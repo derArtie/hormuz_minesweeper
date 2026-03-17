@@ -1,4 +1,6 @@
 (function () {
+  const VERSION = '1.0.0';
+
   const COLS = 60, ROWS = 40, CELL = 12;
   const DIFFS = {
     easy:   { mines: 45,  label: 'Leicht', color: '#44bb66' },
@@ -130,6 +132,7 @@
     });
   }
   renderScores();
+  document.getElementById('ver').textContent = `v${VERSION}`;
 
   const canvas = document.getElementById('gc');
   const ctx = canvas.getContext('2d');

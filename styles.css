@@ -189,11 +189,22 @@ canvas {
 
 #st {
   margin-top: 6px;
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   color: #5a8aaa;
   font-size: 10px;
 }
 
 #gw.day #st {
   color: #7ab8d8;
+}
+
+#ver {
+  color: #3a6a88;
+  flex-shrink: 0;
+}
+
+#gw.day #ver {
+  color: #5a8aaa;
 }
