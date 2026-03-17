@@ -32,11 +32,13 @@ Klicke auf Wasserzellen, um sie aufzudecken. Vermeide die versteckten Seeminen. 
 ## Dateistruktur
 
 ```
-hormuz_minesweeper.html   — HTML-Struktur
-styles.css                — Styling (Layout, Farben, UI-Komponenten)
-game.js                   — Spiellogik und Canvas-Rendering
+index.html          — Startseite (Spielbeschreibung, Link zum Spiel)
+minesweeper/
+  index.html        — Spielseite
+  game.js           — Spiellogik und Canvas-Rendering
+  styles.css        — Styling (Layout, Farben, UI-Komponenten)
 ```
 
 ## Starten
 
-Einfach `hormuz_minesweeper.html` im Browser öffnen — keine Installation oder Build-Schritt erforderlich.
+`index.html` im Browser öffnen — keine Installation oder Build-Schritt erforderlich.

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hormuz Minesweeper</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d1520;
+      color: #a0c8e0;
+      font-family: 'Courier New', monospace;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .page {
+      max-width: 640px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 22px;
+      color: #c8e8ff;
+      letter-spacing: 2px;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: #4a7a9a;
+      margin-bottom: 28px;
+    }
+
+    .play-btn {
+      display: inline-block;
+      background: #0d5a8a;
+      border: 1px solid #2a90c0;
+      color: #c0e8ff;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      font-weight: bold;
+      padding: 10px 28px;
+      border-radius: 4px;
+      text-decoration: none;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-bottom: 32px;
+    }
+
+    .play-btn:hover { background: #1870a8; }
+
+    section { margin-bottom: 24px; }
+
+    h2 {
+      font-size: 10px;
+      color: #5a9abf;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #1a3a50;
+    }
+
+    p {
+      font-size: 11px;
+      line-height: 1.7;
+      color: #7aaac8;
+    }
+
+    ul {
+      list-style: none;
+      font-size: 11px;
+      line-height: 2;
+      color: #7aaac8;
+    }
+
+    ul li::before { content: '⚓ '; color: #3a6a88; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    th {
+      text-align: left;
+      color: #5a9abf;
+      font-weight: normal;
+      padding: 3px 8px 3px 0;
+      border-bottom: 1px solid #1a3a50;
+    }
+
+    td {
+      padding: 4px 8px 4px 0;
+      color: #7aaac8;
+      border-bottom: 1px solid #0f2535;
+    }
+
+    td:first-child { color: #a0c8e0; }
+
+    .kbd {
+      background: #1a3a50;
+      border: 1px solid #2a5570;
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-size: 10px;
+      color: #c0e0f8;
+      white-space: nowrap;
+    }
+
+    .diff-easy   { color: #44bb66; }
+    .diff-medium { color: #e8c040; }
+    .diff-hard   { color: #ee4444; }
+
+    footer {
+      margin-top: 32px;
+      font-size: 10px;
+      color: #2a5570;
+      text-align: right;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <h1>⚓ Hormuz Minesweeper</h1>
+    <p class="subtitle">Persischer Golf · Straße von Hormuz · Golf von Oman</p>
+
+    <a class="play-btn" href="minesweeper/">▶ Spiel starten</a>
+
+    <section>
+      <h2>Spielprinzip</h2>
+      <p>
+        Ein browser-basiertes Minesweeper auf einer stilisierten Karte des Persischen Golfs.
+        Decke Wasserzellen auf und vermeide die versteckten Seeminen.
+        Markiere verdächtige Felder mit einer Flagge, um das Spielfeld zu kartieren.
+      </p>
+    </section>
+
+    <section>
+      <h2>Steuerung</h2>
+      <table>
+        <tr>
+          <th>Aktion</th>
+          <th>Eingabe</th>
+        </tr>
+        <tr>
+          <td>Zelle aufdecken</td>
+          <td><span class="kbd">Linksklick</span></td>
+        </tr>
+        <tr>
+          <td>Flagge / ? setzen</td>
+          <td><span class="kbd">Rechtsklick</span></td>
+        </tr>
+        <tr>
+          <td>Chord-Reveal</td>
+          <td><span class="kbd">Linksklick</span> auf aufgedeckte Zahl (wenn Flaggenanzahl stimmt)</td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>Schwierigkeitsgrade</h2>
+      <table>
+        <tr>
+          <th>Stufe</th>
+          <th>Seeminen</th>
+        </tr>
+        <tr>
+          <td class="diff-easy">Leicht</td>
+          <td>45</td>
+        </tr>
+        <tr>
+          <td class="diff-medium">Mittel</td>
+          <td>99</td>
+        </tr>
+        <tr>
+          <td class="diff-hard">Schwer</td>
+          <td>150</td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>Features</h2>
+      <ul>
+        <li>Kartenansicht mit Länderbeschriftungen (Iran, Saudi-Arabien, Katar, VAE, Oman)</li>
+        <li>Animiertes Wasser mit Wellenbewegung</li>
+        <li>Partikeleffekte bei Explosionen</li>
+        <li>Tag/Nacht-Modus</li>
+        <li>Schiff-Cursor auf spielbaren Feldern</li>
+        <li>Persistente Bestzeiten pro Schwierigkeitsgrad (Top 3)</li>
+        <li>Erster Klick ist immer sicher</li>
+      </ul>
+    </section>
+
+    <footer>Hormuz Minesweeper &mdash; läuft vollständig im Browser, keine Installation nötig</footer>
+  </div>
+</body>
+
+</html>
