@@ -4,24 +4,60 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hormuz Minesweeper</title>
+  <title>Hormuz Strategic</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
   <div id="gw">
-    <div id="hdr">
-      <div class="lcd" id="mc">045</div>
-      <div id="diff-btns">
-        <button class="dbtn active" data-d="easy">Leicht</button>
-        <button class="dbtn" data-d="medium">Mittel</button>
-        <button class="dbtn" data-d="hard">Schwer</button>
+
+    <!-- Navigation Header -->
+    <header id="nav">
+      <div id="brand">
+        <div id="brand-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="5" r="3"/>
+            <line x1="12" y1="22" x2="12" y2="8"/>
+            <path d="M5 12H2a10 10 0 0 0 20 0h-3"/>
+          </svg>
+        </div>
+        <div id="brand-text">
+          <div id="brand-title">Hormuz Strategic</div>
+          <div id="brand-sub">Maritime Navigation Protocol</div>
+        </div>
       </div>
-      <button id="sb">🙂</button>
-      <button id="dn-btn" title="Tag/Nacht">☀️</button>
-      <div class="lcd" id="tm">000</div>
+
+      <nav id="diff-btns">
+        <button class="dbtn active" data-d="easy">Easy</button>
+        <button class="dbtn" data-d="medium">Medium</button>
+        <button class="dbtn" data-d="hard">Hard</button>
+      </nav>
+
+      <div id="nav-actions">
+        <button id="dn-btn" title="Tag/Nacht umschalten">☀️</button>
+      </div>
+    </header>
+
+    <!-- Control Bar -->
+    <div id="hdr">
+      <div class="counter-group">
+        <span class="counter-label">Mines Detected</span>
+        <div class="lcd" id="mc">045</div>
+      </div>
+
+      <button id="sb" title="Neues Spiel">🧭</button>
+
+      <div class="counter-group">
+        <span class="counter-label">Mission Clock</span>
+        <div class="lcd" id="tm">000</div>
+      </div>
     </div>
+
+    <!-- Canvas -->
     <div id="cc">
       <canvas id="gc"></canvas>
       <div id="ov">
@@ -29,14 +65,30 @@
         <div id="os">Klick zum Neustart</div>
       </div>
     </div>
-    <div id="hs-panel">
-      <div id="hs-title">⚓ Bestzeiten</div>
-      <div id="hs-list"></div>
-    </div>
-    <div id="st">
-      <span>L-Klick: aufdecken | R-Klick: Flagge/? | Chord: Zahl klicken wenn Flaggen gesetzt</span>
-      <span id="ver"></span>
-    </div>
+
+    <!-- Footer -->
+    <footer id="ft">
+      <div id="hs-panel">
+        <div id="hs-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+          </svg>
+          Personal Records
+        </div>
+        <div id="hs-list"></div>
+      </div>
+
+      <div id="st">
+        <div id="st-title">Protocol Instructions</div>
+        <ul class="inst-list">
+          <li><span>Left-Click</span><span>Scan Sector</span></li>
+          <li><span>Right-Click</span><span>Place Flag</span></li>
+          <li><span>Chord</span><span>Click Number</span></li>
+        </ul>
+        <span id="ver"></span>
+      </div>
+    </footer>
+
   </div>
 
   <script src="game.js"></script>
