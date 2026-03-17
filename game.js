@@ -102,12 +102,28 @@
   const waterCells = [];
   for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (P[r][c]) waterCells.push({ r, c });
 
-  const scores = { easy: [], medium: [], hard: [] };
+  const SCORES_KEY = 'hormuz_scores';
+
+  function loadScores() {
+    try {
+      const saved = localStorage.getItem(SCORES_KEY);
+      return saved ? JSON.parse(saved) : { easy: [], medium: [], hard: [] };
+    } catch {
+      return { easy: [], medium: [], hard: [] };
+    }
+  }
+
+  function persistScores() {
+    localStorage.setItem(SCORES_KEY, JSON.stringify(scores));
+  }
+
+  const scores = loadScores();
 
   function saveScore(d, t) {
     scores[d].push(t);
     scores[d].sort((a, b) => a - b);
     if (scores[d].length > 5) scores[d] = scores[d].slice(0, 5);
+    persistScores();
     renderScores();
   }
 
