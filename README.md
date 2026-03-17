@@ -26,8 +26,10 @@ Klicke auf Wasserzellen, um sie aufzudecken. Vermeide die versteckten Seeminen. 
 - Partikeleffekte bei Explosionen
 - Tag/Nacht-Modus (☀️ / 🌙)
 - Schiff-Cursor beim Hovern über spielbare Felder
-- Bestzeiten-Anzeige pro Schwierigkeitsgrad (Top 3)
+- Persistente Bestzeiten via localStorage (Top 5 pro Schwierigkeitsgrad)
 - Erster Klick ist immer sicher (keine Mine im 3×3-Bereich)
+- Modernes UI im maritimen Dark-Design (Inter + JetBrains Mono)
+- Versionsnummer im UI sichtbar
 
 ## Dateistruktur
 
@@ -38,6 +40,10 @@ minesweeper/
   game.js           — Spiellogik und Canvas-Rendering
   styles.css        — Styling (Layout, Farben, UI-Komponenten)
 ```
+
+## Version
+
+`1.0.1` — Persistent scores, UI redesign (maritime dark theme)
 
 ## Starten
 
