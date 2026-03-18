@@ -5,6 +5,45 @@
   padding: 0;
 }
 
+*:not(dialog) {
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    interpolate-size: allow-keywords;
+  }
+}
+
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+
+input, button, textarea, select {
+  font: inherit;
+}
+
+p, h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+}
+
+p {
+  text-wrap: pretty;
+}
+h1, h2, h3, h4, h5, h6 {
+  text-wrap: balance;
+}
+
+#root {
+  isolation: isolate;
+}
+
 /* ── Design Tokens ─────────────────────────────────────── */
 :root {
   --bg:         #0f172a;
@@ -322,6 +361,7 @@ canvas {
 /* ── High Scores Panel ─────────────────────────────────── */
 #hs-panel {
   flex-grow: 1;
+  width: 100%;
 }
 
 #hs-title {
@@ -439,3 +479,107 @@ canvas {
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* ── Mobile ────────────────────────────────────────────── */
+@media (max-width: 520px) {
+  body {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  #gw {
+    max-width: 100%;
+    /* kein min-height: kein schwarzer Leerraum */
+  }
+
+  /* Nav */
+  #nav {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  #brand-sub   { display: none; }
+  #brand-title { font-size: 11px; white-space: normal; line-height: 1.25; max-width: 80px; }
+  #brand-icon  { width: 30px; height: 30px; }
+
+  .dbtn {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+
+  /* Control Bar */
+  #hdr {
+    border-left: none;
+    border-right: none;
+    padding: 10px 12px;
+    gap: 16px;
+  }
+
+  .lcd {
+    font-size: 20px;
+    min-width: 72px;
+    padding: 5px 10px;
+  }
+
+  #sb {
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+  }
+
+  /* Canvas: kein flex-grow → kein schwarzer Block darunter */
+  #cc {
+    border-left: none;
+    border-right: none;
+    flex-grow: 0;
+  }
+
+  /* Meme */
+  #meme-img,
+  #meme-vid {
+    max-width: min(240px, 80vw);
+    max-height: 150px;
+  }
+
+  /* Footer: untereinander stapeln */
+  #ft {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 12px;
+  }
+
+  #hs-list {
+    gap: 6px;
+  }
+
+  /* Instructions: kompakte Zeile mit Abstand zwischen Label & Wert */
+  #st {
+    width: 100%;
+    padding: 10px 12px;
+  }
+
+  #st-title { margin-bottom: 6px; }
+
+  .inst-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    column-gap: 16px;
+    row-gap: 3px;
+  }
+
+  .inst-list li {
+    justify-content: flex-start;
+    gap: 6px;
+  }
+
+  #ver {
+    margin-top: 6px;
+    padding-top: 6px;
+  }
+}
