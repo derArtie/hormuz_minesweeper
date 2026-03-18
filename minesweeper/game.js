@@ -459,7 +459,8 @@
       const x = c * CELL, y = r * CELL, isL = L[r][c], isP = P[r][c], isR = revealed[r][c], isIso = !isL && !isP;
       if (isL) {
         ctx.fillStyle = (r + c) % 2 === 0 ? C.landA : C.landB; ctx.fillRect(x, y, CELL, CELL);
-        ctx.strokeStyle = 'rgba(0,0,0,0.12)'; ctx.lineWidth = 0.3; ctx.strokeRect(x, y, CELL, CELL);
+        ctx.fillStyle = 'rgba(255,255,255,0.22)'; ctx.fillRect(x, y, CELL, 2); ctx.fillRect(x, y, 2, CELL);
+        ctx.fillStyle = 'rgba(0,0,0,0.30)'; ctx.fillRect(x, y + CELL - 2, CELL, 2); ctx.fillRect(x + CELL - 2, y, 2, CELL);
       } else if (isIso) {
         const wave = Math.sin(waveT * .8 + (r + c) * .5) * .04;
         ctx.fillStyle = (r + c) % 2 === 0 ? C.isoA : C.isoB; ctx.fillRect(x, y, CELL, CELL);
@@ -468,8 +469,6 @@
         const wave = Math.sin(waveT + (r * .7 + c * .4)) * .06 + Math.sin(waveT * 1.3 + (c * .6 - r * .3)) * .04;
         ctx.fillStyle = (r + c) % 2 === 0 ? C.waterA : C.waterB; ctx.fillRect(x, y, CELL, CELL);
         ctx.fillStyle = `rgba(255,255,255,${Math.max(0, wave + .05)})`; ctx.fillRect(x, y, CELL, CELL);
-        ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fillRect(x, y, CELL, 2); ctx.fillRect(x, y, 2, CELL);
-        ctx.fillStyle = 'rgba(0,0,0,0.2)'; ctx.fillRect(x, y + CELL - 2, CELL, 2); ctx.fillRect(x + CELL - 2, y, 2, CELL);
         if (flagged[r][c]) drawFlag(x, y, CELL);
         else if (qmark[r][c]) drawQuestion(x, y, CELL);
       } else {
