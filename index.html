@@ -4,204 +4,342 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hormuz Minesweeper</title>
+  <title>Hormuz Strategic</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0f172a;
+      --surface:  #1e293b;
+      --surface2: #263548;
+      --border:   #334155;
+      --accent:   #3b82f6;
+      --accent-dim: #1d4ed8;
+      --text:     #cbd5e1;
+      --muted:    #64748b;
+      --easy:     #4ade80;
+      --medium:   #fbbf24;
+      --hard:     #f87171;
+    }
 
     body {
-      background: #0d1520;
-      color: #a0c8e0;
-      font-family: 'Courier New', monospace;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
       min-height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 24px 16px;
+      padding: 40px 16px 60px;
     }
 
-    .page {
-      max-width: 640px;
-      width: 100%;
-    }
+    .page { max-width: 680px; width: 100%; }
 
-    h1 {
-      font-size: 22px;
-      color: #c8e8ff;
-      letter-spacing: 2px;
-      margin-bottom: 6px;
-    }
-
-    .subtitle {
-      font-size: 11px;
-      color: #4a7a9a;
-      margin-bottom: 28px;
-    }
-
-    .play-btn {
-      display: inline-block;
-      background: #0d5a8a;
-      border: 1px solid #2a90c0;
-      color: #c0e8ff;
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-      font-weight: bold;
-      padding: 10px 28px;
-      border-radius: 4px;
-      text-decoration: none;
-      letter-spacing: 1px;
-      cursor: pointer;
-      transition: background 0.15s;
+    /* ── Header ── */
+    .hero {
+      display: flex;
+      align-items: center;
+      gap: 16px;
       margin-bottom: 32px;
     }
 
-    .play-btn:hover { background: #1870a8; }
+    .hero-icon {
+      width: 52px; height: 52px;
+      background: var(--accent);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      color: #fff;
+    }
 
-    section { margin-bottom: 24px; }
-
-    h2 {
-      font-size: 10px;
-      color: #5a9abf;
+    .hero-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 10px;
-      padding-bottom: 4px;
-      border-bottom: 1px solid #1a3a50;
+      color: #f1f5f9;
+    }
+
+    .hero-sub {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ── Play button ── */
+    .play-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 14px 32px;
+      border-radius: 10px;
+      text-decoration: none;
+      margin-bottom: 36px;
+      transition: background 0.15s, transform 0.1s;
+      width: 100%;
+    }
+
+    .play-btn:hover  { background: #2563eb; }
+    .play-btn:active { transform: scale(0.98); }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
     }
 
     p {
-      font-size: 11px;
+      font-size: 13px;
       line-height: 1.7;
-      color: #7aaac8;
+      color: #94a3b8;
     }
 
-    ul {
-      list-style: none;
-      font-size: 11px;
-      line-height: 2;
-      color: #7aaac8;
+    /* ── Controls grid ── */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 24px;
     }
 
-    ul li::before { content: '⚓ '; color: #3a6a88; }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11px;
-    }
-
-    th {
-      text-align: left;
-      color: #5a9abf;
-      font-weight: normal;
-      padding: 3px 8px 3px 0;
-      border-bottom: 1px solid #1a3a50;
-    }
-
-    td {
-      padding: 4px 8px 4px 0;
-      color: #7aaac8;
-      border-bottom: 1px solid #0f2535;
-    }
-
-    td:first-child { color: #a0c8e0; }
-
-    .kbd {
-      background: #1a3a50;
-      border: 1px solid #2a5570;
-      border-radius: 3px;
-      padding: 1px 5px;
+    .ctrl-group-label {
       font-size: 10px;
-      color: #c0e0f8;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .ctrl-list { list-style: none; }
+
+    .ctrl-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      padding: 5px 0;
+      border-bottom: 1px solid #1e2d3d;
+      gap: 8px;
+    }
+
+    .ctrl-list li:last-child { border-bottom: none; }
+
+    .ctrl-list .action { color: #94a3b8; }
+
+    .ctrl-list .key {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 2px 7px;
+      color: #cbd5e1;
       white-space: nowrap;
+      flex-shrink: 0;
     }
 
-    .diff-easy   { color: #44bb66; }
-    .diff-medium { color: #e8c040; }
-    .diff-hard   { color: #ee4444; }
+    /* ── Difficulty ── */
+    .diff-row {
+      display: flex;
+      gap: 12px;
+    }
 
-    footer {
-      margin-top: 32px;
+    .diff-card {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+
+    .diff-name {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .diff-name.easy   { color: var(--easy); }
+    .diff-name.medium { color: var(--medium); }
+    .diff-name.hard   { color: var(--hard); }
+
+    .diff-mines {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      font-weight: 500;
+      color: #f1f5f9;
+    }
+
+    .diff-label {
       font-size: 10px;
-      color: #2a5570;
-      text-align: right;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ── Features ── */
+    .feature-list { list-style: none; }
+
+    .feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #94a3b8;
+      padding: 6px 0;
+      border-bottom: 1px solid #1e2d3d;
+      line-height: 1.5;
+    }
+
+    .feature-list li:last-child { border-bottom: none; }
+
+    .feature-list .feat-icon {
+      font-size: 14px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── Footer ── */
+    .page-footer {
+      margin-top: 32px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .controls-grid { grid-template-columns: 1fr; gap: 16px; }
+      .diff-row { gap: 8px; }
+      .diff-card { padding: 12px 10px; }
+      .diff-mines { font-size: 18px; }
     }
   </style>
 </head>
 
 <body>
   <div class="page">
-    <h1>⚓ Hormuz Minesweeper</h1>
-    <p class="subtitle">Persischer Golf · Straße von Hormuz · Golf von Oman</p>
 
-    <a class="play-btn" href="minesweeper/">▶ Spiel starten</a>
+    <div class="hero">
+      <div class="hero-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="5" r="3"/>
+          <line x1="12" y1="22" x2="12" y2="8"/>
+          <path d="M5 12H2a10 10 0 0 0 20 0h-3"/>
+        </svg>
+      </div>
+      <div>
+        <div class="hero-title">Hormuz Strategic</div>
+        <div class="hero-sub">Maritime Navigation Protocol</div>
+      </div>
+    </div>
 
-    <section>
-      <h2>Spielprinzip</h2>
+    <a class="play-btn" href="minesweeper/">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      Mission starten
+    </a>
+
+    <!-- Spielprinzip -->
+    <div class="card">
+      <div class="card-title">Spielprinzip</div>
       <p>
         Ein browser-basiertes Minesweeper auf einer stilisierten Karte des Persischen Golfs.
         Decke Wasserzellen auf und vermeide die versteckten Seeminen.
-        Markiere verdächtige Felder mit einer Flagge, um das Spielfeld zu kartieren.
+        Markiere verdächtige Felder mit einer Flagge, um das Spielfeld zu kartieren —
+        der erste Klick ist immer sicher.
       </p>
-    </section>
+    </div>
 
-    <section>
-      <h2>Steuerung</h2>
-      <table>
-        <tr>
-          <th>Aktion</th>
-          <th>Eingabe</th>
-        </tr>
-        <tr>
-          <td>Zelle aufdecken</td>
-          <td><span class="kbd">Linksklick</span></td>
-        </tr>
-        <tr>
-          <td>Flagge / ? setzen</td>
-          <td><span class="kbd">Rechtsklick</span></td>
-        </tr>
-        <tr>
-          <td>Chord-Reveal</td>
-          <td><span class="kbd">Linksklick</span> auf aufgedeckte Zahl (wenn Flaggenanzahl stimmt)</td>
-        </tr>
-      </table>
-    </section>
+    <!-- Steuerung -->
+    <div class="card">
+      <div class="card-title">Steuerung</div>
+      <div class="controls-grid">
+        <div>
+          <div class="ctrl-group-label">Desktop</div>
+          <ul class="ctrl-list">
+            <li><span class="action">Zelle aufdecken</span><span class="key">Linksklick</span></li>
+            <li><span class="action">Flagge setzen</span><span class="key">Rechtsklick</span></li>
+            <li><span class="action">Chord-Reveal</span><span class="key">Klick auf Zahl</span></li>
+            <li><span class="action">Zoom</span><span class="key">Scroll</span></li>
+          </ul>
+        </div>
+        <div>
+          <div class="ctrl-group-label">Mobile</div>
+          <ul class="ctrl-list">
+            <li><span class="action">Zelle aufdecken</span><span class="key">Tap</span></li>
+            <li><span class="action">Flagge setzen</span><span class="key">Long Press</span></li>
+            <li><span class="action">Zoom</span><span class="key">Pinch</span></li>
+            <li><span class="action">Karte verschieben</span><span class="key">Drag</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
 
-    <section>
-      <h2>Schwierigkeitsgrade</h2>
-      <table>
-        <tr>
-          <th>Stufe</th>
-          <th>Seeminen</th>
-        </tr>
-        <tr>
-          <td class="diff-easy">Leicht</td>
-          <td>45</td>
-        </tr>
-        <tr>
-          <td class="diff-medium">Mittel</td>
-          <td>99</td>
-        </tr>
-        <tr>
-          <td class="diff-hard">Schwer</td>
-          <td>150</td>
-        </tr>
-      </table>
-    </section>
+    <!-- Schwierigkeitsgrade -->
+    <div class="card">
+      <div class="card-title">Schwierigkeitsgrade</div>
+      <div class="diff-row">
+        <div class="diff-card">
+          <div class="diff-name easy">Leicht</div>
+          <div class="diff-mines">45</div>
+          <div class="diff-label">Seeminen</div>
+        </div>
+        <div class="diff-card">
+          <div class="diff-name medium">Mittel</div>
+          <div class="diff-mines">99</div>
+          <div class="diff-label">Seeminen</div>
+        </div>
+        <div class="diff-card">
+          <div class="diff-name hard">Schwer</div>
+          <div class="diff-mines">150</div>
+          <div class="diff-label">Seeminen</div>
+        </div>
+      </div>
+    </div>
 
-    <section>
-      <h2>Features</h2>
-      <ul>
-        <li>Kartenansicht mit Länderbeschriftungen (Iran, Saudi-Arabien, Katar, VAE, Oman)</li>
-        <li>Animiertes Wasser mit Wellenbewegung</li>
-        <li>Partikeleffekte bei Explosionen</li>
-        <li>Tag/Nacht-Modus</li>
-        <li>Schiff-Cursor auf spielbaren Feldern</li>
-        <li>Persistente Bestzeiten pro Schwierigkeitsgrad (Top 3)</li>
-        <li>Erster Klick ist immer sicher</li>
+    <!-- Features -->
+    <div class="card">
+      <div class="card-title">Features</div>
+      <ul class="feature-list">
+        <li><span class="feat-icon">🗺️</span><span>Kartenansicht mit Länderbeschriftungen — Persischer Golf, Straße von Hormuz, Golf von Oman</span></li>
+        <li><span class="feat-icon">🌊</span><span>Animiertes Wasser mit Wellenbewegung und Partikeleffekte bei Explosionen</span></li>
+        <li><span class="feat-icon">🔍</span><span>Pan &amp; Zoom — auf Desktop per Scroll, auf Mobile per Pinch &amp; Drag</span></li>
+        <li><span class="feat-icon">🌙</span><span>Tag/Nacht-Modus umschaltbar</span></li>
+        <li><span class="feat-icon">🚢</span><span>Schiff-Cursor auf spielbaren Feldern</span></li>
+        <li><span class="feat-icon">🏆</span><span>Persistente Bestzeiten pro Schwierigkeitsgrad (Top 5) — bleiben nach Reload erhalten</span></li>
+        <li><span class="feat-icon">😹</span><span>Katzen-Memes beim Gewinnen und Verlieren mit zufälligen Sprüchen</span></li>
+        <li><span class="feat-icon">📱</span><span>Vollständig mobiloptimiert — kein Download, läuft direkt im Browser</span></li>
       </ul>
-    </section>
+    </div>
 
-    <footer>Hormuz Minesweeper &mdash; läuft vollständig im Browser, keine Installation nötig</footer>
+    <div class="page-footer">© 2026 DerArtie. Hormuz Strategic.</div>
+
   </div>
 </body>
 
