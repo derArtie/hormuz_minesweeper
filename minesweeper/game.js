@@ -720,94 +720,86 @@
   init();
   drawFrame();
 
-  // ── DEBUG MODE ──────────────────────────────────────────────────────────────
-  // Aktivierung: URL-Parameter ?debug  (z.B. http://localhost/?debug)
-  // Für normale Nutzer vollständig unsichtbar.
-  const DEBUG = new URLSearchParams(location.search).has('debug');
-  if (DEBUG) {
-    // Debug-Panel in die Seite injizieren
-    const panel = document.createElement('div');
-    panel.id = 'dbg-panel';
-    panel.innerHTML = `
-      <div style="font-weight:600;margin-bottom:6px;color:#facc15">🔧 Dev-Panel</div>
-      <div class="dbg-row"><kbd>W</kbd> Sofort gewinnen</div>
-      <div class="dbg-row"><kbd>L</kbd> Sofort verlieren</div>
-      <div class="dbg-row"><kbd>S</kbd> Testscores laden</div>
-      <div class="dbg-row"><kbd>X</kbd> Scores leeren</div>
-      <div class="dbg-row"><kbd>I</kbd> Neu starten</div>
-    `;
-    Object.assign(panel.style, {
-      position: 'fixed', bottom: '16px', right: '16px', zIndex: '9999',
-      background: 'rgba(15,23,42,0.95)', border: '1px solid #334155',
-      borderRadius: '8px', padding: '12px 16px', fontSize: '12px',
-      color: '#94a3b8', fontFamily: 'Inter, sans-serif', lineHeight: '1.8',
-      backdropFilter: 'blur(8px)', boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-    });
-    // Inline-Stile für kbd und Rows
-    panel.querySelectorAll('.dbg-row').forEach(r => Object.assign(r.style, { display: 'flex', gap: '8px', alignItems: 'center' }));
-    document.body.appendChild(panel);
-    // KBD-Elemente nach dem Append stylen
-    panel.querySelectorAll('kbd').forEach(k => Object.assign(k.style, {
-      display: 'inline-block', background: '#1e293b', border: '1px solid #475569',
-      borderRadius: '4px', padding: '0 5px', fontFamily: 'JetBrains Mono, monospace',
-      color: '#e2e8f0', fontSize: '11px', minWidth: '20px', textAlign: 'center',
-    }));
+  (() => {
+    let _n = 0, _t;
+    document.getElementById('ver').addEventListener('click', () => {
+      clearTimeout(_t);
+      _t = setTimeout(() => { _n = 0; }, 600);
+      if (++_n < 3) return;
+      _n = 0;
 
-    function dbgEnsurePlaying() {
-      if (gs === 'idle' || gs === 'won' || gs === 'lost') {
-        init();
-        const seed = waterCells[Math.floor(waterCells.length / 2)];
-        fc = false; gs = 'playing';
-        placeMines(seed.r, seed.c);
-        ti = setInterval(() => {
-          tv = Math.min(999, tv + 1);
-          document.getElementById('tm').textContent = String(tv).padStart(3, '0');
-        }, 1000);
-      }
-    }
+      if (document.getElementById('_p')) return;
 
-    document.addEventListener('keydown', e => {
-      if (e.target.tagName === 'INPUT') return;
-      switch (e.key.toUpperCase()) {
+      const p = document.createElement('div');
+      p.id = '_p';
+      p.innerHTML = `
+        <div style="font-weight:600;margin-bottom:6px;color:#facc15">🔧 Dev-Panel</div>
+        <div class="_r"><kbd>W</kbd> Sofort gewinnen</div>
+        <div class="_r"><kbd>L</kbd> Sofort verlieren</div>
+        <div class="_r"><kbd>S</kbd> Testscores laden</div>
+        <div class="_r"><kbd>X</kbd> Scores leeren</div>
+        <div class="_r"><kbd>I</kbd> Neu starten</div>
+      `;
+      Object.assign(p.style, {
+        position: 'fixed', bottom: '16px', right: '16px', zIndex: '9999',
+        background: 'rgba(15,23,42,0.95)', border: '1px solid #334155',
+        borderRadius: '8px', padding: '12px 16px', fontSize: '12px',
+        color: '#94a3b8', fontFamily: 'Inter, sans-serif', lineHeight: '1.8',
+        backdropFilter: 'blur(8px)', boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+      });
+      p.querySelectorAll('._r').forEach(r => Object.assign(r.style, { display: 'flex', gap: '8px', alignItems: 'center' }));
+      document.body.appendChild(p);
+      p.querySelectorAll('kbd').forEach(k => Object.assign(k.style, {
+        display: 'inline-block', background: '#1e293b', border: '1px solid #475569',
+        borderRadius: '4px', padding: '0 5px', fontFamily: 'JetBrains Mono, monospace',
+        color: '#e2e8f0', fontSize: '11px', minWidth: '20px', textAlign: 'center',
+      }));
 
-        case 'W': { // Sofort gewinnen
-          dbgEnsurePlaying();
-          for (let r = 0; r < ROWS; r++)
-            for (let c = 0; c < COLS; c++)
-              if (P[r][c] && board[r][c] !== -1) revealed[r][c] = true;
-          handleWon();
-          break;
-        }
-
-        case 'L': { // Sofort verlieren
-          dbgEnsurePlaying();
-          const mine = waterCells.find(({ r, c }) => board[r][c] === -1);
-          if (mine) { revealed[mine.r][mine.c] = true; spawnExplosion(mine.r, mine.c); handleLost(); }
-          break;
-        }
-
-        case 'S': { // Testscores für alle Schwierigkeiten laden
-          scores.easy   = [42, 67, 91, 110, 134];
-          scores.medium = [88, 105, 143];
-          scores.hard   = [201, 256];
-          persistScores();
-          renderScores();
-          break;
-        }
-
-        case 'X': { // Alle Scores löschen
-          scores.easy = []; scores.medium = []; scores.hard = [];
-          persistScores();
-          renderScores();
-          break;
-        }
-
-        case 'I': { // Neu starten
+      function _ep() {
+        if (gs === 'idle' || gs === 'won' || gs === 'lost') {
           init();
-          break;
+          const seed = waterCells[Math.floor(waterCells.length / 2)];
+          fc = false; gs = 'playing';
+          placeMines(seed.r, seed.c);
+          ti = setInterval(() => {
+            tv = Math.min(999, tv + 1);
+            document.getElementById('tm').textContent = String(tv).padStart(3, '0');
+          }, 1000);
         }
       }
+
+      document.addEventListener('keydown', function _h(e) {
+        if (e.target.tagName === 'INPUT') return;
+        switch (e.key.toUpperCase()) {
+          case 'W': {
+            _ep();
+            for (let r = 0; r < ROWS; r++)
+              for (let c = 0; c < COLS; c++)
+                if (P[r][c] && board[r][c] !== -1) revealed[r][c] = true;
+            handleWon();
+            break;
+          }
+          case 'L': {
+            _ep();
+            const mine = waterCells.find(({ r, c }) => board[r][c] === -1);
+            if (mine) { revealed[mine.r][mine.c] = true; spawnExplosion(mine.r, mine.c); handleLost(); }
+            break;
+          }
+          case 'S': {
+            scores.easy   = [42, 67, 91, 110, 134];
+            scores.medium = [88, 105, 143];
+            scores.hard   = [201, 256];
+            persistScores(); renderScores();
+            break;
+          }
+          case 'X': {
+            scores.easy = []; scores.medium = []; scores.hard = [];
+            persistScores(); renderScores();
+            break;
+          }
+          case 'I': { init(); break; }
+        }
+      });
     });
-  }
-  // ── END DEBUG ────────────────────────────────────────────────────────────────
+  })();
 })();
