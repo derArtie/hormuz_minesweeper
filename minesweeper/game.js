@@ -259,7 +259,7 @@
   let mouseCanvasX = -99, mouseCanvasY = -99;
   let vScale = 1, vPanX = 0, vPanY = 0;
   let board, revealed, flagged, qmark, gs, tv, ti, fc, mineCount;
-  let playerPos = null, lives = 0, patrolDir = 1, patrolStartCol = 0, patrolEndCol = 0;
+  let playerPos = null, lives = 0, patrolDir = 1, patrolStartCol = 0, patrolEndCol = 0, patrolZoomAnim = null;
 
   function init() {
     mineCount = DIFFS[currentDiff].mines;
@@ -270,6 +270,7 @@
     gs = 'idle'; tv = 0; fc = true; particles = [];
     vScale = 1; vPanX = 0; vPanY = 0;
     playerPos = null;
+    patrolZoomAnim = null;
     clearInterval(ti);
     document.getElementById('tm').textContent = '000';
     if (gameMode === 'patrol') {
@@ -282,6 +283,13 @@
       placeMines(sc.r, sc.c);
       playerPos = { r: sc.r, c: sc.c };
       revealed[sc.r][sc.c] = true;
+      const W = canvas.width, H = canvas.height, toScale = 3;
+      const cx = sc.c * CELL + CELL / 2, cy = sc.r * CELL + CELL / 2;
+      patrolZoomAnim = {
+        start: performance.now(), duration: 1800, toScale,
+        toPanX: Math.max(W * (1 - toScale), Math.min(0, W / 2 - cx * toScale)),
+        toPanY: Math.max(H * (1 - toScale), Math.min(0, H / 2 - cy * toScale)),
+      };
       lives = DIFFS[currentDiff].lives;
       document.getElementById('mc-label').textContent = 'Lives';
       document.getElementById('mc').textContent = String(lives).padStart(3, '0');
@@ -419,8 +427,17 @@
 
   function drawFrame(ts = 0) {
     requestAnimationFrame(drawFrame);
+    if (patrolZoomAnim) {
+      const t = Math.min(1, (ts - patrolZoomAnim.start) / patrolZoomAnim.duration);
+      const e = t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
+      vScale = 1 + (patrolZoomAnim.toScale - 1) * e;
+      vPanX  = patrolZoomAnim.toPanX * e;
+      vPanY  = patrolZoomAnim.toPanY * e;
+      if (t >= 1) patrolZoomAnim = null;
+    }
+
     const overlayUp = (gs === 'won' || gs === 'lost') && particles.length === 0;
-    const interval = overlayUp ? 200 : 33; // ~5 fps vs ~30 fps
+    const interval = overlayUp ? 200 : patrolZoomAnim ? 0 : 33;
     if (ts - lastRenderTs < interval) return;
     lastRenderTs = ts;
 
