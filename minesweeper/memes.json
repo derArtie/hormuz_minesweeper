@@ -1,0 +1,53 @@
+{
+  "captions": {
+    "won": [
+      "Einer der größten Seekapitäne unserer Zeit. 🫡",
+      "Die Straße von Hormuz gehört jetzt dir.",
+      "NSA fragt: Wer hat dir geholfen?",
+      "Sonar-Meister der ersten Klasse. Respekt.",
+      "Kein Platz mehr für Seeminen. Kapitän.",
+      "Das Pentagon will deine Nummer.",
+      "Strategisch. Präzise. Unaufhaltbar.",
+      "Lloyd's of London erhöht deine Prämie nicht. Gut so.",
+      "Iran hat Fragen. Du hast Antworten.",
+      "Einfach mal alle Minen im Kopf behalten. Kein Problem.",
+      "Die Besatzung feiert. Du schwitzt noch.",
+      "Häfen weltweit öffnen für dich ihre Tore.",
+      "Militärische Präzision. Zivile Tarnung.",
+      "Der Suezkanal war Aufwärmtraining.",
+      "Minen: 0. Du: alles."
+    ],
+    "lost": [
+      "Das Minenfeld kämpft zurück. 💀",
+      "BOOM! Die iranische Marine bedankt sich.",
+      "Hätte man die auch flaggen können...",
+      "Das Schiff sinkt — und dein Ruf auch.",
+      "Kurze Stille. Dann: nichts mehr.",
+      "Lehrgeld bezahlt. Teures Lehrgeld.",
+      "Nicht jede Reise endet im Hafen.",
+      "Die Mine hat dich schon gesehen. Du sie nicht.",
+      "Lloyd's of London weint leise.",
+      "Ruhm und Ehre: vertagt.",
+      "Versicherung ungültig. Grund: Unvorsichtigkeit.",
+      "Der Kapitän verlässt das Schiff zuerst. Unfreiwillig.",
+      "Nächste Fahrt vielleicht mit Radar.",
+      "Irgendwo lacht ein Minenräumer.",
+      "Das war kein Fisch."
+    ]
+  },
+  "files": {
+    "won": [
+      "img/win/cat_vibing.mp4",
+      "img/win/persian_cat.jpg",
+      "img/win/scared-cat.jpg",
+      "img/win/smiling-cat.jpg"
+    ],
+    "lost": [
+      "img/lose/approved_crying_cat.jpg",
+      "img/lose/cat_zoning_out.mp4",
+      "img/lose/crying_cat.jpg",
+      "img/lose/grumpy_cat.jpg",
+      "img/lose/salad_cat.webp"
+    ]
+  }
+}

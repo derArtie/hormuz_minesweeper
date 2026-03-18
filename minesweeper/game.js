@@ -1,5 +1,5 @@
 (function () {
-  const VERSION = '1.0.4';
+  const VERSION = '1.0.6';
 
   const COLS = 60, ROWS = 40, CELL = 12;
   const DIFFS = {
@@ -8,6 +8,14 @@
     hard:   { mines: 150, label: 'Schwer', color: '#ee4444' },
   };
   let currentDiff = 'easy', dayMode = false;
+
+  // ── Konfigurationskonstanten ────────────────────────────
+  const LONG_PRESS_MS    = 500;
+  const ZOOM_FACTOR      = 1.15;
+  const ZOOM_MIN         = 1;
+  const ZOOM_MAX         = 5;
+  const WAVE_STEP        = 0.04;
+  const OVERLAY_DELAY_MS = 900;
 
   // 1 = Land, 0 = Wasser/Spielfeld
   const RAW = [
@@ -119,6 +127,29 @@
 
   const scores = loadScores();
 
+  // ── Hilfsfunktionen ─────────────────────────────────────
+  function inBounds(r, c) { return r >= 0 && r < ROWS && c >= 0 && c < COLS; }
+
+  function forEachNeighbor(r, c, cb) {
+    for (let dr = -1; dr <= 1; dr++)
+      for (let dc = -1; dc <= 1; dc++) {
+        const nr = r + dr, nc = c + dc;
+        if (inBounds(nr, nc)) cb(nr, nc);
+      }
+  }
+
+  function updateMineDisplay() {
+    document.getElementById('mc').textContent = String(mineCount - flagCount()).padStart(3, '0');
+  }
+
+  function toggleFlag(r, c) {
+    if (!inBounds(r, c) || !P[r][c] || revealed[r][c]) return;
+    if (!flagged[r][c] && !qmark[r][c])     flagged[r][c] = true;
+    else if (flagged[r][c]) { flagged[r][c] = false; qmark[r][c] = true; }
+    else                      qmark[r][c] = false;
+    updateMineDisplay();
+  }
+
   function saveScore(d, t) {
     scores[d].push(t);
     scores[d].sort((a, b) => a - b);
@@ -134,12 +165,12 @@
       const cfg = DIFFS[d], en = scores[d];
       const card = document.createElement('div');
       card.className = 'hs-entry';
-      const label = `<div class="hs-entry-label" style="color:${cfg.color}">${cfg.label}</div>`;
+      const label = `<div class="hs-entry-label ${d}-color">${cfg.label}</div>`;
       if (!en.length) {
-        card.innerHTML = label + `<div style="color:#556;font-family:'JetBrains Mono',monospace;font-size:13px">—</div>`;
+        card.innerHTML = label + `<div class="hs-entry-time hs-entry-empty">—</div>`;
       } else {
         const times = en.slice(0, 5).map((t, i) =>
-          `<div style="font-family:'JetBrains Mono',monospace;font-size:${i === 0 ? 16 : 13}px;color:${i === 0 ? '#e8d080' : '#556'}">${t}s</div>`
+          `<div class="hs-entry-time${i === 0 ? ' hs-entry-best' : ' hs-entry-rest'}">${t}s</div>`
         ).join('');
         card.innerHTML = label + times;
       }
@@ -150,62 +181,9 @@
   document.getElementById('ver').textContent = `v${VERSION}`;
 
   // ── Changelog ──────────────────────────────────────────
-  const CHANGELOG = [
-    {
-      version: '1.0.4',
-      date: 'März 2026',
-      items: [
-        'Changelog-Übersicht hinzugefügt',
-        'Desktop/Mobile-Steuerung in Protocol Instructions nebeneinander',
-        'Text-Selektion bei Long Press auf iOS behoben',
-        'Startseite neu gestaltet — passt jetzt zum Spieldesign',
-      ],
-    },
-    {
-      version: '1.0.3',
-      date: 'März 2026',
-      items: [
-        'Pan & Zoom: Pinch auf Mobile, Scroll auf Desktop',
-        'Long Press zum Setzen von Flaggen auf Mobile',
-        'Protocol Instructions mit Desktop/Mobile-Sektionen',
-        'Schiff-Cursor verkleinert und zentriert',
-      ],
-    },
-    {
-      version: '1.0.2',
-      date: 'März 2026',
-      items: [
-        'Katzen-Memes beim Gewinnen und Verlieren',
-        'Mehr lustige Sprüche pro Spielausgang',
-        'Kein doppeltes Bild oder Caption zweimal hintereinander',
-        'Cache Busting via ?v= Parameter eingeführt',
-      ],
-    },
-    {
-      version: '1.0.1',
-      date: 'März 2026',
-      items: [
-        'UI-Redesign nach maritimem Designkonzept',
-        'Inter + JetBrains Mono Fonts',
-        'Pill-Navigation, LCD-Zähler, Tag/Nacht-Modus',
-        'Startseite und Spielseite getrennt (minesweeper/)',
-      ],
-    },
-    {
-      version: '1.0.0',
-      date: 'März 2026',
-      items: [
-        'Persistente Bestzeiten via localStorage (Top 5)',
-        'Versionsnummer im UI',
-        'CSS, JS und HTML aufgeteilt',
-        'README befüllt',
-      ],
-    },
-  ];
-
-  function renderChangelog() {
+  function renderChangelog(entries) {
     const body = document.getElementById('cl-body');
-    body.innerHTML = CHANGELOG.map((entry, i) => `
+    body.innerHTML = entries.map((entry, i) => `
       <div>
         <div class="cl-version">
           <span class="cl-ver-tag ${i === 0 ? 'latest' : 'old'}">${entry.version}</span>
@@ -218,7 +196,12 @@
     `).join('');
   }
 
-  renderChangelog();
+  fetch('changelog.json')
+    .then(r => r.json())
+    .then(entries => renderChangelog(entries))
+    .catch(() => {
+      document.getElementById('cl-body').textContent = 'Changelog konnte nicht geladen werden.';
+    });
 
   const clModal = document.getElementById('cl-modal');
   document.getElementById('cl-btn').addEventListener('click', () => clModal.classList.toggle('open'));
@@ -263,11 +246,7 @@
 
   function placeMines(er, ec) {
     const excl = new Set();
-    for (let dr = -1; dr <= 1; dr++)
-      for (let dc = -1; dc <= 1; dc++) {
-        const nr = er + dr, nc = ec + dc;
-        if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) excl.add(nr * COLS + nc);
-      }
+    forEachNeighbor(er, ec, (nr, nc) => excl.add(nr * COLS + nc));
     const pool = waterCells.filter(({ r, c }) => !excl.has(r * COLS + c));
     for (let i = pool.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -279,37 +258,23 @@
       for (let c = 0; c < COLS; c++) {
         if (board[r][c] === -1) continue;
         let cnt = 0;
-        for (let dr = -1; dr <= 1; dr++)
-          for (let dc = -1; dc <= 1; dc++) {
-            const nr = r + dr, nc = c + dc;
-            if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && board[nr][nc] === -1) cnt++;
-          }
+        forEachNeighbor(r, c, (nr, nc) => { if (board[nr][nc] === -1) cnt++; });
         board[r][c] = cnt;
       }
   }
 
   function reveal(r, c) {
-    if (r < 0 || r >= ROWS || c < 0 || c >= COLS || revealed[r][c] || flagged[r][c] || qmark[r][c] || !P[r][c]) return;
+    if (!inBounds(r, c) || revealed[r][c] || flagged[r][c] || qmark[r][c] || !P[r][c]) return;
     revealed[r][c] = true;
-    if (board[r][c] === 0)
-      for (let dr = -1; dr <= 1; dr++)
-        for (let dc = -1; dc <= 1; dc++) reveal(r + dr, c + dc);
+    if (board[r][c] === 0) forEachNeighbor(r, c, reveal);
   }
 
   function chordReveal(r, c) {
     if (!revealed[r][c] || board[r][c] <= 0) return;
     let f = 0;
-    for (let dr = -1; dr <= 1; dr++)
-      for (let dc = -1; dc <= 1; dc++) {
-        const nr = r + dr, nc = c + dc;
-        if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && flagged[nr][nc]) f++;
-      }
+    forEachNeighbor(r, c, (nr, nc) => { if (flagged[nr][nc]) f++; });
     if (f !== board[r][c]) return;
-    for (let dr = -1; dr <= 1; dr++)
-      for (let dc = -1; dc <= 1; dc++) {
-        const nr = r + dr, nc = c + dc;
-        if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && !flagged[nr][nc] && !revealed[nr][nc]) reveal(nr, nc);
-      }
+    forEachNeighbor(r, c, (nr, nc) => { if (!flagged[nr][nc] && !revealed[nr][nc]) reveal(nr, nc); });
   }
 
   function flagCount() {
@@ -458,13 +423,9 @@
     });
 
     const { r: cr, c: cc } = mouseCell;
-    if (cr >= 0 && cr < ROWS && cc >= 0 && cc < COLS && revealed[cr] && revealed[cr][cc] && board[cr] && board[cr][cc] > 0) {
+    if (inBounds(cr, cc) && revealed[cr] && revealed[cr][cc] && board[cr] && board[cr][cc] > 0) {
       let f = 0;
-      for (let dr = -1; dr <= 1; dr++)
-        for (let dc = -1; dc <= 1; dc++) {
-          const nr = cr + dr, nc = cc + dc;
-          if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && flagged[nr][nc]) f++;
-        }
+      forEachNeighbor(cr, cc, (nr, nc) => { if (flagged[nr][nc]) f++; });
       if (f === board[cr][cc]) {
         ctx.save(); ctx.strokeStyle = 'rgba(255,220,50,0.8)'; ctx.lineWidth = 1.5;
         ctx.strokeRect(cc * CELL + 1, cr * CELL + 1, CELL - 2, CELL - 2); ctx.restore();
@@ -482,7 +443,7 @@
       canvas.style.cursor = 'default';
     }
 
-    waveT += 0.04;
+    waveT += WAVE_STEP;
     requestAnimationFrame(drawFrame);
   }
 
@@ -517,8 +478,8 @@
     const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
     const cx = (e.clientX - rect.left) * sx;
     const cy = (e.clientY - rect.top)  * sy;
-    const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
-    const newScale = Math.max(1, Math.min(5, vScale * factor));
+    const factor = e.deltaY < 0 ? ZOOM_FACTOR : 1 / ZOOM_FACTOR;
+    const newScale = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, vScale * factor));
     vPanX = cx - (cx - vPanX) * (newScale / vScale);
     vPanY = cy - (cy - vPanY) * (newScale / vScale);
     vScale = newScale;
@@ -552,15 +513,12 @@
           touchPanned = true;
           const synth = { clientX: touchState.startX, clientY: touchState.startY };
           const { r, c } = getCell(synth);
-          if (r >= 0 && r < ROWS && c >= 0 && c < COLS && !(gs === 'won' || gs === 'lost') && P[r][c] && !revealed[r][c]) {
-            if (!flagged[r][c] && !qmark[r][c])      flagged[r][c] = true;
-            else if (flagged[r][c]) { flagged[r][c] = false; qmark[r][c] = true; }
-            else qmark[r][c] = false;
-            document.getElementById('mc').textContent = String(mineCount - flagCount()).padStart(3, '0');
+          if (!(gs === 'won' || gs === 'lost')) {
+            toggleFlag(r, c);
           }
           touchState = null;
         }
-      }, 500);
+      }, LONG_PRESS_MS);
     }
   }, { passive: false });
 
@@ -574,7 +532,7 @@
       const newCx   = (e.touches[0].clientX + e.touches[1].clientX) / 2;
       const newCy   = (e.touches[0].clientY + e.touches[1].clientY) / 2;
       const factor   = newDist / touchState.dist;
-      const newScale = Math.max(1, Math.min(5, vScale * factor));
+      const newScale = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, vScale * factor));
       const pivotX   = (newCx - rect.left) * sx;
       const pivotY   = (newCy - rect.top)  * sy;
       vPanX = pivotX - (pivotX - vPanX) * (newScale / vScale) + (newCx - touchState.cx) * sx;
@@ -598,43 +556,6 @@
     if (e.touches.length === 0) touchState = null;
   }, { passive: false });
 
-  const MEME_CAPTIONS = {
-    won: [
-      'Einer der größten Seekapitäne unserer Zeit. 🫡',
-      'Die Straße von Hormuz gehört jetzt dir.',
-      'NSA fragt: Wer hat dir geholfen?',
-      'Sonar-Meister der ersten Klasse. Respekt.',
-      'Kein Platz mehr für Seeminen. Kapitän.',
-      'Das Pentagon will deine Nummer.',
-      'Strategisch. Präzise. Unaufhaltbar.',
-      "Lloyd's of London erhöht deine Prämie nicht. Gut so.",
-      'Iran hat Fragen. Du hast Antworten.',
-      'Einfach mal alle Minen im Kopf behalten. Kein Problem.',
-      'Die Besatzung feiert. Du schwitzt noch.',
-      'Häfen weltweit öffnen für dich ihre Tore.',
-      'Militärische Präzision. Zivile Tarnung.',
-      'Der Suezkanal war Aufwärmtraining.',
-      'Minen: 0. Du: alles.',
-    ],
-    lost: [
-      'Das Minenfeld kämpft zurück. 💀',
-      'BOOM! Die iranische Marine bedankt sich.',
-      'Hätte man die auch flaggen können...',
-      'Das Schiff sinkt — und dein Ruf auch.',
-      'Kurze Stille. Dann: nichts mehr.',
-      'Lehrgeld bezahlt. Teures Lehrgeld.',
-      'Nicht jede Reise endet im Hafen.',
-      'Die Mine hat dich schon gesehen. Du sie nicht.',
-      "Lloyd's of London weint leise.",
-      'Ruhm und Ehre: vertagt.',
-      'Versicherung ungültig. Grund: Unvorsichtigkeit.',
-      'Der Kapitän verlässt das Schiff zuerst. Unfreiwillig.',
-      'Nächste Fahrt vielleicht mit Radar.',
-      'Irgendwo lacht ein Minenräumer.',
-      'Das war kein Fisch.',
-    ],
-  };
-
   function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
   function pickNoDupe(arr, lastRef) {
@@ -647,22 +568,12 @@
 
   const _lastCap  = { won: { val: null }, lost: { val: null } };
   const _lastMeme = { won: { val: null }, lost: { val: null } };
+  let _memesData  = null;
 
-  const LOCAL_MEMES = {
-    lost: [
-      'img/lose/approved_crying_cat.jpg',
-      'img/lose/cat_zoning_out.mp4',
-      'img/lose/crying_cat.jpg',
-      'img/lose/grumpy_cat.jpg',
-      'img/lose/salad_cat.webp',
-    ],
-    won: [
-      'img/win/cat_vibing.mp4',
-      'img/win/persian_cat.jpg',
-      'img/win/scared-cat.jpg',
-      'img/win/smiling-cat.jpg',
-    ],
-  };
+  fetch('memes.json')
+    .then(r => r.json())
+    .then(data => { _memesData = data; })
+    .catch(() => {});
 
   function showMeme(type) {
     const img = document.getElementById('meme-img');
@@ -673,9 +584,11 @@
     vid.classList.remove('loaded');
     vid.pause();
 
-    cap.textContent = pickNoDupe(MEME_CAPTIONS[type], _lastCap[type]);
+    if (!_memesData) return;
 
-    const src = pickNoDupe(LOCAL_MEMES[type], _lastMeme[type]);
+    cap.textContent = pickNoDupe(_memesData.captions[type], _lastCap[type]);
+
+    const src = pickNoDupe(_memesData.files[type], _lastMeme[type]);
     if (src.endsWith('.mp4')) {
       vid.src = src;
       vid.classList.add('loaded');
@@ -694,7 +607,7 @@
     const ot = document.getElementById('ot');
     ot.textContent = 'BOOM! 💥'; ot.style.color = '#ff5544';
     showMeme('lost');
-    setTimeout(() => document.getElementById('ov').classList.add('show'), 900);
+    setTimeout(() => document.getElementById('ov').classList.add('show'), OVERLAY_DELAY_MS);
   }
 
   function handleWon() {
@@ -737,11 +650,7 @@
     e.preventDefault();
     if (gs === 'won' || gs === 'lost') return;
     const { r, c } = getCell(e);
-    if (r < 0 || r >= ROWS || c < 0 || c >= COLS || !P[r][c] || revealed[r][c]) return;
-    if (!flagged[r][c] && !qmark[r][c])      flagged[r][c] = true;
-    else if (flagged[r][c]) { flagged[r][c] = false; qmark[r][c] = true; }
-    else qmark[r][c] = false;
-    document.getElementById('mc').textContent = String(mineCount - flagCount()).padStart(3, '0');
+    toggleFlag(r, c);
   });
 
   document.getElementById('ov').addEventListener('click', init);

@@ -86,13 +86,16 @@ body {
 
 /* ── Day Mode ──────────────────────────────────────────── */
 #gw.day {
-  --bg:         #d0e4f0;
-  --surface:    #b8cfe0;
+  --bg:         #cfe2f0;
+  --surface:    #ddeef8;
   --surface-2:  #c8dded;
-  --border:     #7aaac8;
-  --text:       #1e3a55;
-  --text-muted: #4a7a9a;
-  --text-dim:   #3a6a88;
+  --border:     #90bcd4;
+  --border-2:   #a8ccdf;
+  --text:       #0f2a42;
+  --text-muted: #3a6a88;
+  --text-dim:   #2a5470;
+  --mine-red:   #c0392b;
+  --clock-blue: #1a5fa8;
 }
 
 /* ── Navigation Header ─────────────────────────────────── */
@@ -324,7 +327,7 @@ body {
   display: flex;
   gap: 8px;
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-dim);
   line-height: 1.5;
 }
 
@@ -531,7 +534,6 @@ canvas {
 }
 
 .hs-entry-label {
-  color: var(--text-muted);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -539,27 +541,31 @@ canvas {
   margin-bottom: 4px;
 }
 
+/* Label-Farben pro Schwierigkeit */
+.hs-entry-label.easy-color   { color: #166534; }
+.hs-entry-label.medium-color { color: #92400e; }
+.hs-entry-label.hard-color   { color: #991b1b; }
+#gw:not(.day) .hs-entry-label.easy-color   { color: #34d399; }
+#gw:not(.day) .hs-entry-label.medium-color { color: #fbbf24; }
+#gw:not(.day) .hs-entry-label.hard-color   { color: #f87171; }
+
 .hs-entry-time {
   font-family: 'JetBrains Mono', monospace;
+}
+
+.hs-entry-best {
   font-size: 16px;
   color: var(--clock-blue);
 }
 
-.hs-entry-time.easy-color  { color: #34d399; }
-.hs-entry-time.medium-color { color: #fbbf24; }
-.hs-entry-time.hard-color  { color: var(--text-muted); }
-
-/* Fallback for simple .hs-entry spans (game.js compatibility) */
-.hs-entry span:first-child {
+.hs-entry-rest {
+  font-size: 13px;
   color: var(--text-dim);
-  display: block;
 }
 
-.hs-entry span:last-child {
-  font-family: 'JetBrains Mono', monospace;
+.hs-entry-empty {
   font-size: 13px;
-  color: var(--clock-blue);
-  display: block;
+  color: var(--text-dim);
 }
 
 /* ── Instructions Panel ────────────────────────────────── */
