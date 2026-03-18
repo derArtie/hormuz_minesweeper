@@ -261,6 +261,26 @@
   let board, revealed, flagged, qmark, gs, tv, ti, fc, mineCount;
   let playerPos = null, lives = 0, patrolDir = 1, patrolStartCol = 0, patrolEndCol = 0, patrolZoomAnim = null;
 
+  const INSTRUCTIONS = {
+    classic: {
+      Desktop: [['Left-Click','Scan Sector'],['Right-Click','Place Flag'],['Chord','Click Number'],['Scroll','Zoom In/Out'],['Middle Click','Pan Map']],
+      Mobile:  [['Tap','Scan Sector'],['Long Press','Place Flag'],['Pinch','Zoom In/Out'],['Drag (zoomed)','Pan Map']],
+    },
+    patrol: {
+      Desktop: [['W / A / S / D','Move Ship'],['Arrow Keys','Move Ship'],['Scroll','Zoom In/Out'],['Middle Click','Pan Map']],
+      Mobile:  [['D-Pad','Move Ship'],['Pinch','Zoom In/Out'],['Drag (zoomed)','Pan Map']],
+    },
+  };
+
+  function updateInstructions() {
+    const groups = INSTRUCTIONS[gameMode];
+    document.getElementById('st-body').innerHTML = Object.entries(groups).map(([label, rows]) =>
+      `<div class="inst-group"><div class="inst-group-label">${label}</div><ul class="inst-list">${
+        rows.map(([k, v]) => `<li><span>${k}</span><span>${v}</span></li>`).join('')
+      }</ul></div>`
+    ).join('');
+  }
+
   function init() {
     mineCount = DIFFS[currentDiff].mines;
     board    = Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -300,6 +320,7 @@
     }
     document.getElementById('sb').textContent = '🙂';
     document.getElementById('dpad').classList.toggle('show', gameMode === 'patrol');
+    updateInstructions();
     document.getElementById('ov').classList.remove('show');
     const mi = document.getElementById('meme-img');
     mi.classList.remove('loaded'); mi.src = '';
