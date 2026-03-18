@@ -525,6 +525,43 @@ canvas {
   height: auto !important;
 }
 
+/* ── D-Pad ─────────────────────────────────────────────── */
+#dpad {
+  display: none;
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  grid-template-areas: ". u ." "l m r" ". d .";
+  grid-template-columns: repeat(3, 36px);
+  grid-template-rows: repeat(3, 36px);
+  gap: 3px;
+  z-index: 9;
+}
+
+@media (pointer: coarse) {
+  #dpad.show { display: grid; }
+}
+
+.dp {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition: background 0.1s;
+}
+
+.dp:active {
+  background: rgba(255, 255, 255, 0.28);
+}
+
 /* ── Overlay ───────────────────────────────────────────── */
 #ov {
   display: none;

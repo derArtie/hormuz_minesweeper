@@ -299,6 +299,7 @@
       document.getElementById('mc').textContent = String(mineCount).padStart(3, '0');
     }
     document.getElementById('sb').textContent = '🙂';
+    document.getElementById('dpad').classList.toggle('show', gameMode === 'patrol');
     document.getElementById('ov').classList.remove('show');
     const mi = document.getElementById('meme-img');
     mi.classList.remove('loaded'); mi.src = '';
@@ -834,6 +835,18 @@
       btn.classList.add('active');
       init();
     });
+  });
+
+  let dpadTimer = null;
+  document.querySelectorAll('.dp').forEach(btn => {
+    const move = () => tryPatrolMove(+btn.dataset.dr, +btn.dataset.dc);
+    btn.addEventListener('touchstart', e => {
+      e.preventDefault();
+      move();
+      dpadTimer = setInterval(move, 180);
+    }, { passive: false });
+    btn.addEventListener('touchend',   () => { clearInterval(dpadTimer); dpadTimer = null; });
+    btn.addEventListener('touchcancel',() => { clearInterval(dpadTimer); dpadTimer = null; });
   });
 
   document.getElementById('cur-btn').addEventListener('click', e => {
