@@ -442,7 +442,9 @@
     ctx.restore(); // end pan/zoom transform
 
     // Cursor außerhalb des Transforms in Canvas-Pixelkoordinaten zeichnen
-    if (cursorMode === 'ship' && showShip()) {
+    if (mmPanning) {
+      canvas.style.cursor = 'grabbing';
+    } else if (cursorMode === 'ship' && showShip()) {
       canvas.style.cursor = 'none';
       ctx.font = `18px serif`; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
       ctx.fillText('🚢', mouseCanvasX - 2, mouseCanvasY - 2);
@@ -468,9 +470,25 @@
   }
 
   let touchActive = false, touchActiveTimer = null;
+  let mmPanning = false, mmLastX = 0, mmLastY = 0;
+
+  canvas.addEventListener('mousedown', e => {
+    if (e.button === 1) { e.preventDefault(); mmPanning = true; mmLastX = e.clientX; mmLastY = e.clientY; }
+  });
+  document.addEventListener('mouseup', e => {
+    if (e.button === 1) mmPanning = false;
+  });
 
   canvas.addEventListener('mousemove', e => {
     if (touchActive) return;
+    if (mmPanning) {
+      const rect = canvas.getBoundingClientRect();
+      const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
+      vPanX += (e.clientX - mmLastX) * sx;
+      vPanY += (e.clientY - mmLastY) * sy;
+      mmLastX = e.clientX; mmLastY = e.clientY;
+      clampView();
+    }
     const { r, c, cx, cy } = getCell(e);
     mouseCanvasX = cx; mouseCanvasY = cy; mouseCell = { r, c };
   });
