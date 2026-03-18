@@ -38,6 +38,18 @@
       </nav>
 
       <div id="nav-actions">
+        <div id="cur-picker">
+          <button id="cur-btn" title="Cursor ändern">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4l7.07 17 2.51-7.39L21 11.07z"/>
+            </svg>
+          </button>
+          <div id="cur-panel">
+            <button class="cur-opt active" data-cur="default">🖱️ Standard</button>
+            <button class="cur-opt" data-cur="crosshair">✖️ Fadenkreuz</button>
+            <button class="cur-opt" data-cur="ship">🚢 Schiff</button>
+          </div>
+        </div>
         <button id="cl-btn" title="Changelog">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>

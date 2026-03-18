@@ -188,6 +188,66 @@ body {
   flex-shrink: 0;
 }
 
+/* ── Cursor Picker ─────────────────────────────────────── */
+#cur-picker {
+  position: relative;
+}
+
+#cur-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+  margin-right: 4px;
+}
+
+#cur-btn:hover { color: var(--accent); }
+
+#cur-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px;
+  z-index: 100;
+  min-width: 140px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  flex-direction: column;
+  gap: 2px;
+}
+
+#cur-panel.open { display: flex; }
+
+.cur-opt {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s, color 0.1s;
+  white-space: nowrap;
+}
+
+.cur-opt:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+}
+
+.cur-opt.active { color: var(--accent); }
+
 #dn-btn {
   background: transparent;
   border: none;
@@ -729,6 +789,7 @@ canvas {
   }
 
   #st-title { margin-bottom: 6px; }
+  #cur-picker { display: none; }
 
   #ver {
     margin-top: 6px;

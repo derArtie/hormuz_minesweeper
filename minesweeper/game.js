@@ -7,7 +7,7 @@
     medium: { mines: 99,  label: 'Mittel', color: '#e8c040' },
     hard:   { mines: 150, label: 'Schwer', color: '#ee4444' },
   };
-  let currentDiff = 'easy', dayMode = false;
+  let currentDiff = 'easy', dayMode = false, cursorMode = 'default';
 
   // ── Konfigurationskonstanten ────────────────────────────
   const LONG_PRESS_MS    = 500;
@@ -442,12 +442,12 @@
     ctx.restore(); // end pan/zoom transform
 
     // Cursor außerhalb des Transforms in Canvas-Pixelkoordinaten zeichnen
-    if (showShip()) {
+    if (cursorMode === 'ship' && showShip()) {
       canvas.style.cursor = 'none';
       ctx.font = `18px serif`; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
       ctx.fillText('🚢', mouseCanvasX - 2, mouseCanvasY - 2);
     } else {
-      canvas.style.cursor = 'default';
+      canvas.style.cursor = cursorMode === 'crosshair' ? 'crosshair' : 'default';
     }
 
     waveT += WAVE_STEP;
@@ -467,7 +467,10 @@
     };
   }
 
+  let touchActive = false, touchActiveTimer = null;
+
   canvas.addEventListener('mousemove', e => {
+    if (touchActive) return;
     const { r, c, cx, cy } = getCell(e);
     mouseCanvasX = cx; mouseCanvasY = cy; mouseCell = { r, c };
   });
@@ -500,6 +503,9 @@
   }
 
   canvas.addEventListener('touchstart', e => {
+    touchActive = true;
+    clearTimeout(touchActiveTimer);
+    mouseCell = { r: -1, c: -1 }; mouseCanvasX = -99; mouseCanvasY = -99;
     if (e.touches.length === 2) {
       e.preventDefault();
       if (touchState) clearTimeout(touchState.longPress);
@@ -560,6 +566,7 @@
   canvas.addEventListener('touchend', e => {
     if (touchState) clearTimeout(touchState.longPress);
     if (e.touches.length === 0) touchState = null;
+    touchActiveTimer = setTimeout(() => { touchActive = false; }, 500);
   }, { passive: false });
 
   function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -673,6 +680,22 @@
       btn.classList.add('active');
       init();
     });
+  });
+
+  document.getElementById('cur-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    document.getElementById('cur-panel').classList.toggle('open');
+  });
+  document.querySelectorAll('.cur-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      cursorMode = btn.dataset.cur;
+      document.querySelectorAll('.cur-opt').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('cur-panel').classList.remove('open');
+    });
+  });
+  document.addEventListener('click', () => {
+    document.getElementById('cur-panel').classList.remove('open');
   });
 
   window.addEventListener('resize', () => { /* canvas CSS width:100% handles scaling */ });
