@@ -655,6 +655,8 @@
     else { reveal(r, c); if (checkWin()) handleWon(); }
   });
 
+  document.getElementById('gw').addEventListener('selectstart', e => e.preventDefault());
+
   canvas.addEventListener('contextmenu', e => {
     e.preventDefault();
     if (gs === 'won' || gs === 'lost') return;

@@ -80,6 +80,8 @@ body {
   flex-direction: column;
   gap: 0;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 /* ── Day Mode ──────────────────────────────────────────── */
