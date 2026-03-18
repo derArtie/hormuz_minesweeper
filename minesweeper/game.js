@@ -149,6 +149,82 @@
   renderScores();
   document.getElementById('ver').textContent = `v${VERSION}`;
 
+  // ── Changelog ──────────────────────────────────────────
+  const CHANGELOG = [
+    {
+      version: '1.0.4',
+      date: 'März 2026',
+      items: [
+        'Changelog-Übersicht hinzugefügt',
+        'Desktop/Mobile-Steuerung in Protocol Instructions nebeneinander',
+        'Text-Selektion bei Long Press auf iOS behoben',
+        'Startseite neu gestaltet — passt jetzt zum Spieldesign',
+      ],
+    },
+    {
+      version: '1.0.3',
+      date: 'März 2026',
+      items: [
+        'Pan & Zoom: Pinch auf Mobile, Scroll auf Desktop',
+        'Long Press zum Setzen von Flaggen auf Mobile',
+        'Protocol Instructions mit Desktop/Mobile-Sektionen',
+        'Schiff-Cursor verkleinert und zentriert',
+      ],
+    },
+    {
+      version: '1.0.2',
+      date: 'März 2026',
+      items: [
+        'Katzen-Memes beim Gewinnen und Verlieren',
+        'Mehr lustige Sprüche pro Spielausgang',
+        'Kein doppeltes Bild oder Caption zweimal hintereinander',
+        'Cache Busting via ?v= Parameter eingeführt',
+      ],
+    },
+    {
+      version: '1.0.1',
+      date: 'März 2026',
+      items: [
+        'UI-Redesign nach maritimem Designkonzept',
+        'Inter + JetBrains Mono Fonts',
+        'Pill-Navigation, LCD-Zähler, Tag/Nacht-Modus',
+        'Startseite und Spielseite getrennt (minesweeper/)',
+      ],
+    },
+    {
+      version: '1.0.0',
+      date: 'März 2026',
+      items: [
+        'Persistente Bestzeiten via localStorage (Top 5)',
+        'Versionsnummer im UI',
+        'CSS, JS und HTML aufgeteilt',
+        'README befüllt',
+      ],
+    },
+  ];
+
+  function renderChangelog() {
+    const body = document.getElementById('cl-body');
+    body.innerHTML = CHANGELOG.map((entry, i) => `
+      <div>
+        <div class="cl-version">
+          <span class="cl-ver-tag ${i === 0 ? 'latest' : 'old'}">${entry.version}</span>
+          <span class="cl-ver-date">${entry.date}</span>
+        </div>
+        <ul class="cl-items">
+          ${entry.items.map(it => `<li>${it}</li>`).join('')}
+        </ul>
+      </div>
+    `).join('');
+  }
+
+  renderChangelog();
+
+  const clModal = document.getElementById('cl-modal');
+  document.getElementById('cl-btn').addEventListener('click', () => clModal.classList.toggle('open'));
+  document.getElementById('cl-close').addEventListener('click', () => clModal.classList.remove('open'));
+  clModal.addEventListener('click', e => { if (e.target === clModal) clModal.classList.remove('open'); });
+
   const canvas = document.getElementById('gc');
   const ctx = canvas.getContext('2d');
   canvas.width = COLS * CELL;
