@@ -1,5 +1,19 @@
 [
   {
+    "version": "1.1.0",
+    "date": "März 2026",
+    "items": [
+      "Neuer Spielmodus: Patrouille — navigiere von einer Seite zur anderen, statt die Karte aufzudecken",
+      "Startseite zufällig links oder rechts, Startposition zufällig im ersten Wasserstreifen",
+      "Schiff wird automatisch platziert und per W/A/S/D oder Pfeiltasten gesteuert",
+      "Kamera zoomt beim Start sanft an das Schiff heran und folgt dem Spieler",
+      "D-Pad-Overlay für Mobile (unten links, nur auf Touch-Geräten sichtbar)",
+      "Zahl unter dem Schiff wird als Kreis-Badge mittig auf dem Schiff angezeigt",
+      "Protocol Instructions wechseln dynamisch je nach aktivem Spielmodus",
+      "Emboss-Effekt von Wasserkacheln auf Landkacheln verschoben"
+    ]
+  },
+  {
     "version": "1.0.8",
     "date": "März 2026",
     "items": [

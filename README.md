@@ -2,22 +2,21 @@
 
 Ein browser-basiertes Minesweeper-Spiel, das auf einer stilisierten Karte der Straße von Hormuz und des Persischen Golfs spielt. Minen sind als Seeminen im Wasser versteckt.
 
-## Spielprinzip
+## Spielmodi
 
-Klicke auf Wasserzellen, um sie aufzudecken. Vermeide die versteckten Seeminen. Markiere verdächtige Felder mit einer Flagge, um das Spielfeld zu kartieren.
+### Klassisch
+Decke alle sicheren Wasserzellen auf, ohne eine Mine zu treffen.
 
-**Steuerung Desktop:**
-- **Linksklick** — Zelle aufdecken
-- **Rechtsklick** — Flagge setzen / Fragezeichen / zurücksetzen
-- **Linksklick auf aufgedeckte Zahl** — Chord-Reveal (deckt alle Nachbarn auf, wenn genug Flaggen gesetzt sind)
-- **Scroll** — Zoom In/Out
-- **Mittlere Maustaste gedrückt halten** — Karte schwenken (im gezoomten Zustand)
+**Steuerung Desktop:** Linksklick — Aufdecken · Rechtsklick — Flagge · Chord — Zahl klicken · Scroll — Zoom · Mitteltaste — Schwenken
 
-**Steuerung Mobile:**
-- **Tap** — Zelle aufdecken
-- **Long Press** — Flagge setzen
-- **Pinch** — Zoom In/Out
-- **Drag (gezoomt)** — Karte schwenken
+**Steuerung Mobile:** Tap — Aufdecken · Long Press — Flagge · Pinch — Zoom · Drag (gezoomt) — Schwenken
+
+### Patrouille
+Navigiere von einer Seite der Karte zur anderen. Das Schiff wird automatisch am Rand platziert, Startseite und Position sind zufällig. Je nach Schwierigkeitsgrad stehen 1–3 Leben zur Verfügung.
+
+**Steuerung Desktop:** W/A/S/D oder Pfeiltasten — Schiff bewegen · Scroll — Zoom · Mitteltaste — Schwenken
+
+**Steuerung Mobile:** D-Pad (unten links) — Schiff bewegen · Pinch — Zoom · Drag (gezoomt) — Schwenken
 
 ## Schwierigkeitsgrade
 
@@ -29,15 +28,19 @@ Klicke auf Wasserzellen, um sie aufzudecken. Vermeide die versteckten Seeminen. 
 
 ## Features
 
+- Zwei Spielmodi: Klassisch und Patrouille
 - Kartenansicht des Persischen Golfs mit Länderbeschriftungen (Iran, Saudi-Arabien, Katar, VAE, Oman)
-- Animiertes Wasser mit Wellenbewegung
+- Animiertes Wasser mit Wellenbewegung, Emboss-Effekt auf Landkacheln
 - Partikeleffekte bei Explosionen
 - Tag/Nacht-Modus (☀️ / 🌙)
 - Cursor-Auswahl: Standard, Fadenkreuz oder Schiff (Desktop)
 - Pan & Zoom: Pinch auf Mobile, Scroll auf Desktop, Mitteltaste zum Schwenken
+- Kamera folgt dem Schiff im Patrouille-Modus mit sanftem Zoom-Intro
+- D-Pad-Overlay für Mobile im Patrouille-Modus
 - Persistente Bestzeiten via localStorage (Top 5 pro Schwierigkeitsgrad)
 - Erster Klick ist immer sicher (keine Mine im 3×3-Bereich)
 - Meme-Einblendung beim Gewinnen / Verlieren
+- Protocol Instructions wechseln dynamisch je nach Spielmodus
 - Modernes UI im maritimen Dark-Design
 - Fonts lokal eingebunden (DSGVO-konform, kein Google CDN)
 - Changelog-Modal mit Versionshistorie
@@ -59,7 +62,7 @@ minesweeper/
 
 ## Version
 
-`1.0.8` — Cursor-Auswahl, Middle-Mouse-Panning, DSGVO-konforme Font-Einbindung
+`1.1.0` — Patrouille-Modus, Kamera-Follow, D-Pad für Mobile, dynamische Instruktionen
 
 ## Starten
 
