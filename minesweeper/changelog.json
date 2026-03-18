@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.0.8",
+    "date": "März 2026",
+    "items": [
+      "Cursor-Auswahl: Standard, Fadenkreuz oder Schiff-Emoji wählbar",
+      "Cursor-Picker auf Mobilgeräten ausgeblendet (Touch-only)",
+      "Schiff-Cursor wird auf Mobile nicht mehr fälschlicherweise angezeigt",
+      "Mittlere Maustaste gedrückt halten zum Schwenken der Karte im gezoomten Zustand"
+    ]
+  },
+  {
     "version": "1.0.7",
     "date": "März 2026",
     "items": [

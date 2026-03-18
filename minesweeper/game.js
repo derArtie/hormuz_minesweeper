@@ -1,5 +1,5 @@
 (function () {
-  const VERSION = '1.0.7';
+  const VERSION = '1.0.8';
 
   const COLS = 60, ROWS = 40, CELL = 12;
   const DIFFS = {
