@@ -732,14 +732,7 @@
 
       const p = document.createElement('div');
       p.id = '_p';
-      p.innerHTML = `
-        <div style="font-weight:600;margin-bottom:6px;color:#facc15">🔧 Dev-Panel</div>
-        <div class="_r"><kbd>W</kbd> Sofort gewinnen</div>
-        <div class="_r"><kbd>L</kbd> Sofort verlieren</div>
-        <div class="_r"><kbd>S</kbd> Testscores laden</div>
-        <div class="_r"><kbd>X</kbd> Scores leeren</div>
-        <div class="_r"><kbd>I</kbd> Neu starten</div>
-      `;
+      p.innerHTML = new TextDecoder().decode(Uint8Array.from(atob('PGRpdiBzdHlsZT0nZm9udC13ZWlnaHQ6NjAwO21hcmdpbi1ib3R0b206NnB4O2NvbG9yOiNmYWNjMTUnPvCflKcgRGV2LVBhbmVsPC9kaXY+PGRpdiBjbGFzcz0iX3IiPjxrYmQ+Vzwva2JkPiBTb2ZvcnQgZ2V3aW5uZW48L2Rpdj48ZGl2IGNsYXNzPSJfciI+PGtiZD5MPC9rYmQ+IFNvZm9ydCB2ZXJsaWVyZW48L2Rpdj48ZGl2IGNsYXNzPSJfciI+PGtiZD5TPC9rYmQ+IFRlc3RzY29yZXMgbGFkZW48L2Rpdj48ZGl2IGNsYXNzPSJfciI+PGtiZD5YPC9rYmQ+IFNjb3JlcyBsZWVyZW48L2Rpdj48ZGl2IGNsYXNzPSJfciI+PGtiZD5JPC9rYmQ+IE5ldSBzdGFydGVuPC9kaXY+'), c => c.charCodeAt(0)));
       Object.assign(p.style, {
         position: 'fixed', bottom: '16px', right: '16px', zIndex: '9999',
         background: 'rgba(15,23,42,0.95)', border: '1px solid #334155',
