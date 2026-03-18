@@ -1,5 +1,14 @@
 [
   {
+    "version": "1.0.7",
+    "date": "März 2026",
+    "items": [
+      "GPU-Optimierung: Render-Loop auf ~30 fps gedrosselt (vorher unkontrolliert ~60 fps)",
+      "Canvas-Rendering pausiert bei ~5 fps wenn Overlay sichtbar und keine Partikel aktiv",
+      "Kein unnötiges Zeichnen mehr wenn Canvas vom Spielende-Screen verdeckt ist"
+    ]
+  },
+  {
     "version": "1.0.6",
     "date": "März 2026",
     "items": [

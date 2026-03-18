@@ -1,5 +1,5 @@
 (function () {
-  const VERSION = '1.0.6';
+  const VERSION = '1.0.7';
 
   const COLS = 60, ROWS = 40, CELL = 12;
   const DIFFS = {
@@ -214,6 +214,7 @@
   canvas.height = ROWS * CELL;
 
   let waveT = 0, particles = [], mouseCell = { r: -1, c: -1 };
+  let lastRenderTs = 0;
   let mouseCanvasX = -99, mouseCanvasY = -99;
   let vScale = 1, vPanX = 0, vPanY = 0;
   let board, revealed, flagged, qmark, gs, tv, ti, fc, mineCount;
@@ -356,7 +357,13 @@
     ctx.fillStyle = color; ctx.fillText(t, px, py);
   }
 
-  function drawFrame() {
+  function drawFrame(ts = 0) {
+    requestAnimationFrame(drawFrame);
+    const overlayUp = (gs === 'won' || gs === 'lost') && particles.length === 0;
+    const interval = overlayUp ? 200 : 33; // ~5 fps vs ~30 fps
+    if (ts - lastRenderTs < interval) return;
+    lastRenderTs = ts;
+
     const C = col(), NC = dayMode ? NC_D : NC_N;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
@@ -444,7 +451,6 @@
     }
 
     waveT += WAVE_STEP;
-    requestAnimationFrame(drawFrame);
   }
 
   function getCell(e) {
