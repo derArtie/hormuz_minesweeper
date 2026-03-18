@@ -430,11 +430,34 @@ canvas {
 /* ── Instructions Panel ────────────────────────────────── */
 #st {
   flex-shrink: 0;
-  width: 200px;
+  width: 300px;
   background: var(--surface-2);
   border: 1px solid var(--border-2);
   border-radius: 8px;
   padding: 12px 14px;
+}
+
+#st-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+}
+
+#st > .inst-group + .inst-group {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+  border-left: 1px solid var(--border-2);
+  padding-left: 16px;
+}
+
+.inst-group-label {
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
 }
 
 #st-title {
@@ -481,7 +504,7 @@ canvas {
 ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
 /* ── Mobile ────────────────────────────────────────────── */
-@media (max-width: 520px) {
+@media (max-width: 699px) {
   body {
     padding: 0;
     align-items: stretch;
@@ -565,18 +588,6 @@ canvas {
   }
 
   #st-title { margin-bottom: 6px; }
-
-  .inst-list {
-    flex-direction: row;
-    flex-wrap: wrap;
-    column-gap: 16px;
-    row-gap: 3px;
-  }
-
-  .inst-list li {
-    justify-content: flex-start;
-    gap: 6px;
-  }
 
   #ver {
     margin-top: 6px;

@@ -1,5 +1,5 @@
 (function () {
-  const VERSION = '1.0.3';
+  const VERSION = '1.0.4';
 
   const COLS = 60, ROWS = 40, CELL = 12;
   const DIFFS = {
@@ -154,7 +154,9 @@
   canvas.width = COLS * CELL;
   canvas.height = ROWS * CELL;
 
-  let waveT = 0, particles = [], mouseX = -99, mouseY = -99, mouseCell = { r: -1, c: -1 };
+  let waveT = 0, particles = [], mouseCell = { r: -1, c: -1 };
+  let mouseCanvasX = -99, mouseCanvasY = -99;
+  let vScale = 1, vPanX = 0, vPanY = 0;
   let board, revealed, flagged, qmark, gs, tv, ti, fc, mineCount;
 
   function init() {
@@ -164,6 +166,7 @@
     flagged  = Array.from({ length: ROWS }, () => new Array(COLS).fill(false));
     qmark    = Array.from({ length: ROWS }, () => new Array(COLS).fill(false));
     gs = 'idle'; tv = 0; fc = true; particles = [];
+    vScale = 1; vPanX = 0; vPanY = 0;
     clearInterval(ti);
     document.getElementById('tm').textContent = '000';
     document.getElementById('mc').textContent = String(mineCount).padStart(3, '0');
@@ -174,6 +177,12 @@
     const mv = document.getElementById('meme-vid');
     mv.classList.remove('loaded'); mv.pause(); mv.src = '';
     document.getElementById('meme-cap').textContent = '';
+  }
+
+  function clampView() {
+    const W = canvas.width, H = canvas.height;
+    vPanX = Math.max(W * (1 - vScale), Math.min(0, vPanX));
+    vPanY = Math.max(H * (1 - vScale), Math.min(0, vPanY));
   }
 
   function placeMines(er, ec) {
@@ -309,6 +318,9 @@
   function drawFrame() {
     const C = col(), NC = dayMode ? NC_D : NC_N;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(vPanX, vPanY);
+    ctx.scale(vScale, vScale);
 
     for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
       const x = c * CELL, y = r * CELL, isL = L[r][c], isP = P[r][c], isR = revealed[r][c], isIso = !isL && !isP;
@@ -369,14 +381,6 @@
       p.life -= p.decay;
     });
 
-    if (showShip()) {
-      canvas.style.cursor = 'none';
-      ctx.font = `12px serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('🚢', mouseX, mouseY);
-    } else {
-      canvas.style.cursor = 'default';
-    }
-
     const { r: cr, c: cc } = mouseCell;
     if (cr >= 0 && cr < ROWS && cc >= 0 && cc < COLS && revealed[cr] && revealed[cr][cc] && board[cr] && board[cr][cc] > 0) {
       let f = 0;
@@ -391,6 +395,17 @@
       }
     }
 
+    ctx.restore(); // end pan/zoom transform
+
+    // Cursor außerhalb des Transforms in Canvas-Pixelkoordinaten zeichnen
+    if (showShip()) {
+      canvas.style.cursor = 'none';
+      ctx.font = `18px serif`; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      ctx.fillText('🚢', mouseCanvasX - 2, mouseCanvasY - 2);
+    } else {
+      canvas.style.cursor = 'default';
+    }
+
     waveT += 0.04;
     requestAnimationFrame(drawFrame);
   }
@@ -398,19 +413,114 @@
   function getCell(e) {
     const rect = canvas.getBoundingClientRect();
     const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
+    const cx = (e.clientX - rect.left) * sx;
+    const cy = (e.clientY - rect.top)  * sy;
+    const gx = (cx - vPanX) / vScale;
+    const gy = (cy - vPanY) / vScale;
     return {
-      c:  Math.floor((e.clientX - rect.left) * sx / CELL),
-      r:  Math.floor((e.clientY - rect.top)  * sy / CELL),
-      px: (e.clientX - rect.left) * sx,
-      py: (e.clientY - rect.top)  * sy,
+      c: Math.floor(gx / CELL),
+      r: Math.floor(gy / CELL),
+      cx, cy,
     };
   }
 
   canvas.addEventListener('mousemove', e => {
-    const { r, c, px, py } = getCell(e);
-    mouseX = px; mouseY = py; mouseCell = { r, c };
+    const { r, c, cx, cy } = getCell(e);
+    mouseCanvasX = cx; mouseCanvasY = cy; mouseCell = { r, c };
   });
-  canvas.addEventListener('mouseleave', () => { mouseCell = { r: -1, c: -1 }; canvas.style.cursor = 'default'; });
+  canvas.addEventListener('mouseleave', () => {
+    mouseCell = { r: -1, c: -1 };
+    mouseCanvasX = -99; mouseCanvasY = -99;
+    canvas.style.cursor = 'default';
+  });
+
+  // ── Wheel Zoom ──────────────────────────────────────────
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
+    const cx = (e.clientX - rect.left) * sx;
+    const cy = (e.clientY - rect.top)  * sy;
+    const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+    const newScale = Math.max(1, Math.min(5, vScale * factor));
+    vPanX = cx - (cx - vPanX) * (newScale / vScale);
+    vPanY = cy - (cy - vPanY) * (newScale / vScale);
+    vScale = newScale;
+    clampView();
+  }, { passive: false });
+
+  // ── Touch Pan & Pinch Zoom ──────────────────────────────
+  let touchState = null, touchPanned = false;
+
+  function getTouchDist(a, b) {
+    return Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
+  }
+
+  canvas.addEventListener('touchstart', e => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      if (touchState) clearTimeout(touchState.longPress);
+      touchState = {
+        type: 'pinch',
+        dist: getTouchDist(e.touches[0], e.touches[1]),
+        cx: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+        cy: (e.touches[0].clientY + e.touches[1].clientY) / 2,
+      };
+    } else if (e.touches.length === 1) {
+      const t = e.touches[0];
+      touchState = { type: 'pan', x: t.clientX, y: t.clientY,
+        startX: t.clientX, startY: t.clientY, moved: false };
+      // Langer Druck → Flagge setzen (Rechtsklick-Ersatz)
+      touchState.longPress = setTimeout(() => {
+        if (touchState && !touchState.moved) {
+          touchPanned = true;
+          const synth = { clientX: touchState.startX, clientY: touchState.startY };
+          const { r, c } = getCell(synth);
+          if (r >= 0 && r < ROWS && c >= 0 && c < COLS && !(gs === 'won' || gs === 'lost') && P[r][c] && !revealed[r][c]) {
+            if (!flagged[r][c] && !qmark[r][c])      flagged[r][c] = true;
+            else if (flagged[r][c]) { flagged[r][c] = false; qmark[r][c] = true; }
+            else qmark[r][c] = false;
+            document.getElementById('mc').textContent = String(mineCount - flagCount()).padStart(3, '0');
+          }
+          touchState = null;
+        }
+      }, 500);
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (!touchState) return;
+    const rect = canvas.getBoundingClientRect();
+    const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
+    if (touchState.type === 'pinch' && e.touches.length === 2) {
+      const newDist = getTouchDist(e.touches[0], e.touches[1]);
+      const newCx   = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const newCy   = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      const factor   = newDist / touchState.dist;
+      const newScale = Math.max(1, Math.min(5, vScale * factor));
+      const pivotX   = (newCx - rect.left) * sx;
+      const pivotY   = (newCy - rect.top)  * sy;
+      vPanX = pivotX - (pivotX - vPanX) * (newScale / vScale) + (newCx - touchState.cx) * sx;
+      vPanY = pivotY - (pivotY - vPanY) * (newScale / vScale) + (newCy - touchState.cy) * sy;
+      vScale = newScale;
+      clampView();
+      touchState.dist = newDist; touchState.cx = newCx; touchState.cy = newCy;
+    } else if (touchState.type === 'pan' && e.touches.length === 1 && vScale > 1) {
+      const dx = (e.touches[0].clientX - touchState.x) * sx;
+      const dy = (e.touches[0].clientY - touchState.y) * sy;
+      if (Math.hypot(e.touches[0].clientX - touchState.startX, e.touches[0].clientY - touchState.startY) > 8) {
+        touchState.moved = true; touchPanned = true;
+      }
+      vPanX += dx; vPanY += dy; clampView();
+      touchState.x = e.touches[0].clientX; touchState.y = e.touches[0].clientY;
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', e => {
+    if (touchState) clearTimeout(touchState.longPress);
+    if (e.touches.length === 0) touchState = null;
+  }, { passive: false });
 
   const MEME_CAPTIONS = {
     won: [
@@ -521,6 +631,7 @@
   }
 
   canvas.addEventListener('click', e => {
+    if (touchPanned) { touchPanned = false; return; }
     e.preventDefault();
     if (gs === 'won' || gs === 'lost') { init(); return; }
     const { r, c } = getCell(e);
