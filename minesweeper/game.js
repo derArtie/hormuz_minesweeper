@@ -110,8 +110,8 @@
   const waterCells = [];
   for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (P[r][c]) waterCells.push({ r, c });
 
-  const PATROL_START_COL = waterCells.reduce((m, w) => Math.min(m, w.c), COLS) + 4;
-  const PATROL_END_COL   = waterCells.reduce((m, w) => Math.max(m, w.c), 0)   - 4;
+  const PATROL_LEFT_COL  = waterCells.reduce((m, w) => Math.min(m, w.c), COLS) + 4;
+  const PATROL_RIGHT_COL = waterCells.reduce((m, w) => Math.max(m, w.c), 0)   - 4;
 
   const SCORES_KEY = 'hormuz_scores';
 
@@ -159,36 +159,27 @@
 
   function handlePatrolClick(r, c) {
     if (!inBounds(r, c) || !P[r][c]) return;
+    if (gs !== 'idle' && gs !== 'playing') return;
+
+    const dr = Math.abs(r - playerPos.r), dc = Math.abs(c - playerPos.c);
+    if (dr > 1 || dc > 1 || (dr === 0 && dc === 0)) return;
 
     if (gs === 'idle') {
-      if (c > PATROL_START_COL) return; // Muss in der Startzone beginnen
-      fc = false; gs = 'playing';
-      placeMines(r, c);
-      playerPos = { r, c };
-      revealed[r][c] = true;
+      gs = 'playing';
       ti = setInterval(() => {
         tv = Math.min(999, tv + 1);
         document.getElementById('tm').textContent = String(tv).padStart(3, '0');
       }, 1000);
-      return;
     }
 
-    if (gs !== 'playing') return;
-
-    // Nur angrenzende Zellen sind begehbar
-    const dr = Math.abs(r - playerPos.r), dc = Math.abs(c - playerPos.c);
-    if (dr > 1 || dc > 1 || (dr === 0 && dc === 0)) return;
-
     if (revealed[r][c]) {
-      // Bereits aufgedeckte Zelle: begehbar außer explodierte Mine
       if (board[r][c] === -1) return;
       playerPos = { r, c };
-      if (c >= PATROL_END_COL) handleWon();
+      if (patrolDir === 1 ? c >= patrolEndCol : c <= patrolEndCol) handleWon();
       return;
     }
 
     if (board[r][c] === -1) {
-      // Mine getroffen → Leben verlieren, Mine explodiert, Spieler bleibt
       revealed[r][c] = true;
       spawnExplosion(r, c);
       lives--;
@@ -197,10 +188,9 @@
       return;
     }
 
-    // Sichere Zelle
     revealed[r][c] = true;
     playerPos = { r, c };
-    if (c >= PATROL_END_COL) handleWon();
+    if (patrolDir === 1 ? c >= patrolEndCol : c <= patrolEndCol) handleWon();
   }
 
   function saveScore(d, t) {
@@ -271,7 +261,7 @@
   let mouseCanvasX = -99, mouseCanvasY = -99;
   let vScale = 1, vPanX = 0, vPanY = 0;
   let board, revealed, flagged, qmark, gs, tv, ti, fc, mineCount;
-  let playerPos = null, lives = 0;
+  let playerPos = null, lives = 0, patrolDir = 1, patrolStartCol = 0, patrolEndCol = 0;
 
   function init() {
     mineCount = DIFFS[currentDiff].mines;
@@ -285,6 +275,15 @@
     clearInterval(ti);
     document.getElementById('tm').textContent = '000';
     if (gameMode === 'patrol') {
+      patrolDir = Math.random() < 0.5 ? 1 : -1;
+      patrolStartCol = patrolDir === 1 ? PATROL_LEFT_COL : PATROL_RIGHT_COL;
+      patrolEndCol   = patrolDir === 1 ? PATROL_RIGHT_COL : PATROL_LEFT_COL;
+      const startCells = waterCells.filter(w => patrolDir === 1 ? w.c <= patrolStartCol : w.c >= patrolStartCol);
+      const sc = startCells[Math.floor(Math.random() * startCells.length)];
+      fc = false;
+      placeMines(sc.r, sc.c);
+      playerPos = { r: sc.r, c: sc.c };
+      revealed[sc.r][sc.c] = true;
       lives = DIFFS[currentDiff].lives;
       document.getElementById('mc-label').textContent = 'Lives';
       document.getElementById('mc').textContent = String(lives).padStart(3, '0');
@@ -506,23 +505,13 @@
     if (gameMode === 'patrol') {
       // Zielzone: goldene Umrandung der rechten Wasserzellen
       for (const { r: pr, c: pc } of waterCells) {
-        if (pc >= PATROL_END_COL) {
+        if (patrolDir === 1 ? pc >= patrolEndCol : pc <= patrolEndCol) {
           ctx.save(); ctx.strokeStyle = 'rgba(255,200,40,0.65)'; ctx.lineWidth = 1.5;
           ctx.strokeRect(pc * CELL + 0.75, pr * CELL + 0.75, CELL - 1.5, CELL - 1.5); ctx.restore();
         }
       }
-      // Startzone: grüne Tönung vor erstem Klick
-      if (gs === 'idle') {
-        ctx.save();
-        for (const { r: pr, c: pc } of waterCells) {
-          if (pc <= PATROL_START_COL) {
-            ctx.fillStyle = 'rgba(68,187,100,0.28)'; ctx.fillRect(pc * CELL, pr * CELL, CELL, CELL);
-          }
-        }
-        ctx.restore();
-      }
       // Angrenzende Zellen: mögliche nächste Züge hervorheben
-      if (gs === 'playing' && playerPos) {
+      if ((gs === 'idle' || gs === 'playing') && playerPos) {
         ctx.save();
         for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
           if (dr === 0 && dc === 0) continue;
@@ -534,7 +523,7 @@
         ctx.restore();
       }
       // Spieler-Marker
-      if (playerPos && gs !== 'idle') {
+      if (playerPos) {
         const px = playerPos.c * CELL, py = playerPos.r * CELL;
         ctx.save();
         ctx.fillStyle = 'rgba(255,220,50,0.9)'; ctx.fillRect(px, py, CELL, CELL);
