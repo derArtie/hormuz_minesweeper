@@ -157,12 +157,10 @@
     updateMineDisplay();
   }
 
-  function handlePatrolClick(r, c) {
-    if (!inBounds(r, c) || !P[r][c]) return;
+  function tryPatrolMove(dr, dc) {
     if (gs !== 'idle' && gs !== 'playing') return;
-
-    const dr = Math.abs(r - playerPos.r), dc = Math.abs(c - playerPos.c);
-    if (dr > 1 || dc > 1 || (dr === 0 && dc === 0)) return;
+    const nr = playerPos.r + dr, nc = playerPos.c + dc;
+    if (!inBounds(nr, nc) || !P[nr][nc]) return;
 
     if (gs === 'idle') {
       gs = 'playing';
@@ -172,25 +170,25 @@
       }, 1000);
     }
 
-    if (revealed[r][c]) {
-      if (board[r][c] === -1) return;
-      playerPos = { r, c };
-      if (patrolDir === 1 ? c >= patrolEndCol : c <= patrolEndCol) handleWon();
+    if (revealed[nr][nc]) {
+      if (board[nr][nc] === -1) return;
+      playerPos = { r: nr, c: nc };
+      if (patrolDir === 1 ? nc >= patrolEndCol : nc <= patrolEndCol) handleWon();
       return;
     }
 
-    if (board[r][c] === -1) {
-      revealed[r][c] = true;
-      spawnExplosion(r, c);
+    if (board[nr][nc] === -1) {
+      revealed[nr][nc] = true;
+      spawnExplosion(nr, nc);
       lives--;
       updateMineDisplay();
       if (lives <= 0) handleLost();
       return;
     }
 
-    revealed[r][c] = true;
-    playerPos = { r, c };
-    if (patrolDir === 1 ? c >= patrolEndCol : c <= patrolEndCol) handleWon();
+    revealed[nr][nc] = true;
+    playerPos = { r: nr, c: nc };
+    if (patrolDir === 1 ? nc >= patrolEndCol : nc <= patrolEndCol) handleWon();
   }
 
   function saveScore(d, t) {
@@ -529,6 +527,12 @@
         ctx.fillStyle = 'rgba(255,220,50,0.9)'; ctx.fillRect(px, py, CELL, CELL);
         ctx.font = `${CELL - 1}px serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText('🚢', px + CELL / 2, py + CELL / 2 + 1);
+        const pv = board[playerPos.r][playerPos.c];
+        if (pv > 0) {
+          ctx.font = `bold ${CELL - 4}px 'Courier New'`; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+          ctx.fillStyle = '#222';
+          ctx.fillText(pv, px + CELL - 1, py + CELL - 1);
+        }
         ctx.restore();
       }
     }
@@ -754,7 +758,7 @@
     if (gs === 'won' || gs === 'lost') { init(); return; }
     const { r, c } = getCell(e);
     if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return;
-    if (gameMode === 'patrol') { handlePatrolClick(r, c); return; }
+    if (gameMode === 'patrol') return;
     if (P[r][c] && revealed[r][c] && board[r] && board[r][c] > 0 && gs === 'playing') {
       chordReveal(r, c);
       let hit = false;
@@ -775,6 +779,16 @@
   });
 
   document.getElementById('gw').addEventListener('selectstart', e => e.preventDefault());
+
+  document.addEventListener('keydown', e => {
+    if (gameMode !== 'patrol') return;
+    if (gs === 'won' || gs === 'lost') return;
+    const dirs = { ArrowUp: [-1,0], ArrowDown: [1,0], ArrowLeft: [0,-1], ArrowRight: [0,1] };
+    const dir = dirs[e.key] ?? (e.key === 'w' || e.key === 'W' ? [-1,0] : e.key === 's' || e.key === 'S' ? [1,0] : e.key === 'a' || e.key === 'A' ? [0,-1] : e.key === 'd' || e.key === 'D' ? [0,1] : null);
+    if (!dir) return;
+    e.preventDefault();
+    tryPatrolMove(dir[0], dir[1]);
+  });
 
   canvas.addEventListener('contextmenu', e => {
     e.preventDefault();
@@ -871,6 +885,7 @@
 
       document.addEventListener('keydown', function _h(e) {
         if (e.target.tagName === 'INPUT') return;
+        if (gameMode === 'patrol') return;
         switch (e.key.toUpperCase()) {
           case 'W': {
             _ep();
