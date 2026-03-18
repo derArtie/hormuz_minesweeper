@@ -29,11 +29,17 @@
         </div>
       </div>
 
-      <nav id="diff-btns">
-        <button class="dbtn active" data-d="easy">Easy</button>
-        <button class="dbtn" data-d="medium">Medium</button>
-        <button class="dbtn" data-d="hard">Hard</button>
-      </nav>
+      <div id="nav-center">
+        <nav id="mode-btns">
+          <button class="mbtn active" data-m="classic">⚓ Klassisch</button>
+          <button class="mbtn" data-m="patrol">🚢 Patrouille</button>
+        </nav>
+        <nav id="diff-btns">
+          <button class="dbtn active" data-d="easy">Easy</button>
+          <button class="dbtn" data-d="medium">Medium</button>
+          <button class="dbtn" data-d="hard">Hard</button>
+        </nav>
+      </div>
 
       <div id="nav-actions">
         <div id="cur-picker">
@@ -71,7 +77,7 @@
     <!-- Control Bar -->
     <div id="hdr">
       <div class="counter-group">
-        <span class="counter-label">Mines Detected</span>
+        <span class="counter-label" id="mc-label">Mines Detected</span>
         <div class="lcd" id="mc">045</div>
       </div>
 

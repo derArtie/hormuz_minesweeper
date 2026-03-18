@@ -3,11 +3,11 @@
 
   const COLS = 60, ROWS = 40, CELL = 12;
   const DIFFS = {
-    easy:   { mines: 45,  label: 'Leicht', color: '#44bb66' },
-    medium: { mines: 99,  label: 'Mittel', color: '#e8c040' },
-    hard:   { mines: 150, label: 'Schwer', color: '#ee4444' },
+    easy:   { mines: 45,  label: 'Leicht', color: '#44bb66', lives: 3 },
+    medium: { mines: 99,  label: 'Mittel', color: '#e8c040', lives: 2 },
+    hard:   { mines: 150, label: 'Schwer', color: '#ee4444', lives: 1 },
   };
-  let currentDiff = 'easy', dayMode = false, cursorMode = 'default';
+  let currentDiff = 'easy', dayMode = false, cursorMode = 'default', gameMode = 'classic';
 
   // ── Konfigurationskonstanten ────────────────────────────
   const LONG_PRESS_MS    = 500;
@@ -110,6 +110,9 @@
   const waterCells = [];
   for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (P[r][c]) waterCells.push({ r, c });
 
+  const PATROL_START_COL = waterCells.reduce((m, w) => Math.min(m, w.c), COLS) + 4;
+  const PATROL_END_COL   = waterCells.reduce((m, w) => Math.max(m, w.c), 0)   - 4;
+
   const SCORES_KEY = 'hormuz_scores';
 
   function loadScores() {
@@ -139,6 +142,10 @@
   }
 
   function updateMineDisplay() {
+    if (gameMode === 'patrol') {
+      document.getElementById('mc').textContent = String(lives).padStart(3, '0');
+      return;
+    }
     document.getElementById('mc').textContent = String(mineCount - flagCount()).padStart(3, '0');
   }
 
@@ -148,6 +155,52 @@
     else if (flagged[r][c]) { flagged[r][c] = false; qmark[r][c] = true; }
     else                      qmark[r][c] = false;
     updateMineDisplay();
+  }
+
+  function handlePatrolClick(r, c) {
+    if (!inBounds(r, c) || !P[r][c]) return;
+
+    if (gs === 'idle') {
+      if (c > PATROL_START_COL) return; // Muss in der Startzone beginnen
+      fc = false; gs = 'playing';
+      placeMines(r, c);
+      playerPos = { r, c };
+      revealed[r][c] = true;
+      ti = setInterval(() => {
+        tv = Math.min(999, tv + 1);
+        document.getElementById('tm').textContent = String(tv).padStart(3, '0');
+      }, 1000);
+      return;
+    }
+
+    if (gs !== 'playing') return;
+
+    // Nur angrenzende Zellen sind begehbar
+    const dr = Math.abs(r - playerPos.r), dc = Math.abs(c - playerPos.c);
+    if (dr > 1 || dc > 1 || (dr === 0 && dc === 0)) return;
+
+    if (revealed[r][c]) {
+      // Bereits aufgedeckte Zelle: begehbar außer explodierte Mine
+      if (board[r][c] === -1) return;
+      playerPos = { r, c };
+      if (c >= PATROL_END_COL) handleWon();
+      return;
+    }
+
+    if (board[r][c] === -1) {
+      // Mine getroffen → Leben verlieren, Mine explodiert, Spieler bleibt
+      revealed[r][c] = true;
+      spawnExplosion(r, c);
+      lives--;
+      updateMineDisplay();
+      if (lives <= 0) handleLost();
+      return;
+    }
+
+    // Sichere Zelle
+    revealed[r][c] = true;
+    playerPos = { r, c };
+    if (c >= PATROL_END_COL) handleWon();
   }
 
   function saveScore(d, t) {
@@ -218,6 +271,7 @@
   let mouseCanvasX = -99, mouseCanvasY = -99;
   let vScale = 1, vPanX = 0, vPanY = 0;
   let board, revealed, flagged, qmark, gs, tv, ti, fc, mineCount;
+  let playerPos = null, lives = 0;
 
   function init() {
     mineCount = DIFFS[currentDiff].mines;
@@ -227,9 +281,18 @@
     qmark    = Array.from({ length: ROWS }, () => new Array(COLS).fill(false));
     gs = 'idle'; tv = 0; fc = true; particles = [];
     vScale = 1; vPanX = 0; vPanY = 0;
+    playerPos = null;
     clearInterval(ti);
     document.getElementById('tm').textContent = '000';
-    document.getElementById('mc').textContent = String(mineCount).padStart(3, '0');
+    if (gameMode === 'patrol') {
+      lives = DIFFS[currentDiff].lives;
+      document.getElementById('mc-label').textContent = 'Lives';
+      document.getElementById('mc').textContent = String(lives).padStart(3, '0');
+    } else {
+      lives = 0;
+      document.getElementById('mc-label').textContent = 'Mines Detected';
+      document.getElementById('mc').textContent = String(mineCount).padStart(3, '0');
+    }
     document.getElementById('sb').textContent = '🙂';
     document.getElementById('ov').classList.remove('show');
     const mi = document.getElementById('meme-img');
@@ -439,6 +502,48 @@
       }
     }
 
+    // ── Patrol-Overlays ──────────────────────────────────────────────────────
+    if (gameMode === 'patrol') {
+      // Zielzone: goldene Umrandung der rechten Wasserzellen
+      for (const { r: pr, c: pc } of waterCells) {
+        if (pc >= PATROL_END_COL) {
+          ctx.save(); ctx.strokeStyle = 'rgba(255,200,40,0.65)'; ctx.lineWidth = 1.5;
+          ctx.strokeRect(pc * CELL + 0.75, pr * CELL + 0.75, CELL - 1.5, CELL - 1.5); ctx.restore();
+        }
+      }
+      // Startzone: grüne Tönung vor erstem Klick
+      if (gs === 'idle') {
+        ctx.save();
+        for (const { r: pr, c: pc } of waterCells) {
+          if (pc <= PATROL_START_COL) {
+            ctx.fillStyle = 'rgba(68,187,100,0.28)'; ctx.fillRect(pc * CELL, pr * CELL, CELL, CELL);
+          }
+        }
+        ctx.restore();
+      }
+      // Angrenzende Zellen: mögliche nächste Züge hervorheben
+      if (gs === 'playing' && playerPos) {
+        ctx.save();
+        for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+          if (dr === 0 && dc === 0) continue;
+          const nr = playerPos.r + dr, nc = playerPos.c + dc;
+          if (inBounds(nr, nc) && P[nr][nc] && !(revealed[nr][nc] && board[nr][nc] === -1)) {
+            ctx.fillStyle = 'rgba(255,255,255,0.13)'; ctx.fillRect(nc * CELL, nr * CELL, CELL, CELL);
+          }
+        }
+        ctx.restore();
+      }
+      // Spieler-Marker
+      if (playerPos && gs !== 'idle') {
+        const px = playerPos.c * CELL, py = playerPos.r * CELL;
+        ctx.save();
+        ctx.fillStyle = 'rgba(255,220,50,0.9)'; ctx.fillRect(px, py, CELL, CELL);
+        ctx.font = `${CELL - 1}px serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('🚢', px + CELL / 2, py + CELL / 2 + 1);
+        ctx.restore();
+      }
+    }
+
     ctx.restore(); // end pan/zoom transform
 
     // Cursor außerhalb des Transforms in Canvas-Pixelkoordinaten zeichnen
@@ -633,10 +738,13 @@
 
   function handleLost() {
     gs = 'lost'; clearInterval(ti);
-    for (let mr = 0; mr < ROWS; mr++) for (let mc = 0; mc < COLS; mc++) if (board[mr][mc] === -1) revealed[mr][mc] = true;
+    if (gameMode === 'classic') {
+      for (let mr = 0; mr < ROWS; mr++) for (let mc = 0; mc < COLS; mc++) if (board[mr][mc] === -1) revealed[mr][mc] = true;
+    }
     document.getElementById('sb').textContent = '😵';
     const ot = document.getElementById('ot');
-    ot.textContent = 'BOOM! 💥'; ot.style.color = '#ff5544';
+    ot.textContent = gameMode === 'patrol' ? 'VERSUNKEN! 🌊' : 'BOOM! 💥';
+    ot.style.color = '#ff5544';
     showMeme('lost');
     setTimeout(() => document.getElementById('ov').classList.add('show'), OVERLAY_DELAY_MS);
   }
@@ -645,7 +753,8 @@
     gs = 'won'; clearInterval(ti); saveScore(currentDiff, tv);
     document.getElementById('sb').textContent = '😎';
     const ot = document.getElementById('ot');
-    ot.textContent = `GEWONNEN! 🎉 ${tv}s`; ot.style.color = DIFFS[currentDiff].color;
+    ot.textContent = gameMode === 'patrol' ? `DURCHGEBROCHEN! 🚢 ${tv}s` : `GEWONNEN! 🎉 ${tv}s`;
+    ot.style.color = DIFFS[currentDiff].color;
     showMeme('won');
     document.getElementById('ov').classList.add('show');
   }
@@ -656,6 +765,7 @@
     if (gs === 'won' || gs === 'lost') { init(); return; }
     const { r, c } = getCell(e);
     if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return;
+    if (gameMode === 'patrol') { handlePatrolClick(r, c); return; }
     if (P[r][c] && revealed[r][c] && board[r] && board[r][c] > 0 && gs === 'playing') {
       chordReveal(r, c);
       let hit = false;
@@ -679,6 +789,7 @@
 
   canvas.addEventListener('contextmenu', e => {
     e.preventDefault();
+    if (gameMode === 'patrol') return;
     if (gs === 'won' || gs === 'lost') return;
     const { r, c } = getCell(e);
     toggleFlag(r, c);
@@ -695,6 +806,14 @@
     btn.addEventListener('click', () => {
       currentDiff = btn.dataset.d;
       document.querySelectorAll('.dbtn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      init();
+    });
+  });
+  document.querySelectorAll('.mbtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      gameMode = btn.dataset.m;
+      document.querySelectorAll('.mbtn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       init();
     });
