@@ -441,6 +441,14 @@
     if (ts - lastRenderTs < interval) return;
     lastRenderTs = ts;
 
+    if (gameMode === 'patrol' && playerPos && !patrolZoomAnim && vScale > 1) {
+      const W = canvas.width, H = canvas.height;
+      const tx = Math.max(W * (1 - vScale), Math.min(0, W / 2 - (playerPos.c * CELL + CELL / 2) * vScale));
+      const ty = Math.max(H * (1 - vScale), Math.min(0, H / 2 - (playerPos.r * CELL + CELL / 2) * vScale));
+      vPanX += (tx - vPanX) * 0.15;
+      vPanY += (ty - vPanY) * 0.15;
+    }
+
     const C = col(), NC = dayMode ? NC_D : NC_N;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
@@ -525,30 +533,20 @@
           ctx.strokeRect(pc * CELL + 0.75, pr * CELL + 0.75, CELL - 1.5, CELL - 1.5); ctx.restore();
         }
       }
-      // Angrenzende Zellen: mögliche nächste Züge hervorheben
-      if ((gs === 'idle' || gs === 'playing') && playerPos) {
-        ctx.save();
-        for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
-          if (dr === 0 && dc === 0) continue;
-          const nr = playerPos.r + dr, nc = playerPos.c + dc;
-          if (inBounds(nr, nc) && P[nr][nc] && !(revealed[nr][nc] && board[nr][nc] === -1)) {
-            ctx.fillStyle = 'rgba(255,255,255,0.13)'; ctx.fillRect(nc * CELL, nr * CELL, CELL, CELL);
-          }
-        }
-        ctx.restore();
-      }
       // Spieler-Marker
       if (playerPos) {
         const px = playerPos.c * CELL, py = playerPos.r * CELL;
         ctx.save();
-        ctx.fillStyle = 'rgba(255,220,50,0.9)'; ctx.fillRect(px, py, CELL, CELL);
         ctx.font = `${CELL - 1}px serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText('🚢', px + CELL / 2, py + CELL / 2 + 1);
         const pv = board[playerPos.r][playerPos.c];
         if (pv > 0) {
-          ctx.font = `bold ${CELL - 4}px 'Courier New'`; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
-          ctx.fillStyle = '#222';
-          ctx.fillText(pv, px + CELL - 1, py + CELL - 1);
+          const r = CELL * 0.38, cx = px + CELL / 2, cy = py + CELL / 2;
+          ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(20,20,20,0.82)'; ctx.fill();
+          ctx.font = `bold ${CELL - 5}px 'Courier New'`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillStyle = ['', '#5aabff','#44cc66','#ff5555','#aaaaff','#ffaaaa','#55dddd','#eee','#aaa'][pv];
+          ctx.fillText(pv, cx, cy + 0.5);
         }
         ctx.restore();
       }
