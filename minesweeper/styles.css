@@ -276,6 +276,38 @@ canvas {
   letter-spacing: 0.05em;
 }
 
+#meme-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 320px;
+}
+
+#meme-img,
+#meme-vid {
+  max-width: 280px;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  display: none;
+}
+
+#meme-img.loaded,
+#meme-vid.loaded {
+  display: block;
+}
+
+#meme-cap {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--text-dim);
+  text-align: center;
+  max-width: 280px;
+  line-height: 1.4;
+}
+
 /* ── Footer ────────────────────────────────────────────── */
 #ft {
   background: var(--surface);

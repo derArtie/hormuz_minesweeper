@@ -169,6 +169,11 @@
     document.getElementById('mc').textContent = String(mineCount).padStart(3, '0');
     document.getElementById('sb').textContent = '🙂';
     document.getElementById('ov').classList.remove('show');
+    const mi = document.getElementById('meme-img');
+    mi.classList.remove('loaded'); mi.src = '';
+    const mv = document.getElementById('meme-vid');
+    mv.classList.remove('loaded'); mv.pause(); mv.src = '';
+    document.getElementById('meme-cap').textContent = '';
   }
 
   function placeMines(er, ec) {
@@ -407,12 +412,102 @@
   });
   canvas.addEventListener('mouseleave', () => { mouseCell = { r: -1, c: -1 }; canvas.style.cursor = 'default'; });
 
+  const MEME_CAPTIONS = {
+    won: [
+      'Einer der größten Seekapitäne unserer Zeit. 🫡',
+      'Die Straße von Hormuz gehört jetzt dir.',
+      'NSA fragt: Wer hat dir geholfen?',
+      'Sonar-Meister der ersten Klasse. Respekt.',
+      'Kein Platz mehr für Seeminen. Kapitän.',
+      'Das Pentagon will deine Nummer.',
+      'Strategisch. Präzise. Unaufhaltbar.',
+      "Lloyd's of London erhöht deine Prämie nicht. Gut so.",
+      'Iran hat Fragen. Du hast Antworten.',
+      'Einfach mal alle Minen im Kopf behalten. Kein Problem.',
+      'Die Besatzung feiert. Du schwitzt noch.',
+      'Häfen weltweit öffnen für dich ihre Tore.',
+      'Militärische Präzision. Zivile Tarnung.',
+      'Der Suezkanal war Aufwärmtraining.',
+      'Minen: 0. Du: alles.',
+    ],
+    lost: [
+      'Das Minenfeld kämpft zurück. 💀',
+      'BOOM! Die iranische Marine bedankt sich.',
+      'Hätte man die auch flaggen können...',
+      'Das Schiff sinkt — und dein Ruf auch.',
+      'Kurze Stille. Dann: nichts mehr.',
+      'Lehrgeld bezahlt. Teures Lehrgeld.',
+      'Nicht jede Reise endet im Hafen.',
+      'Die Mine hat dich schon gesehen. Du sie nicht.',
+      "Lloyd's of London weint leise.",
+      'Ruhm und Ehre: vertagt.',
+      'Versicherung ungültig. Grund: Unvorsichtigkeit.',
+      'Der Kapitän verlässt das Schiff zuerst. Unfreiwillig.',
+      'Nächste Fahrt vielleicht mit Radar.',
+      'Irgendwo lacht ein Minenräumer.',
+      'Das war kein Fisch.',
+    ],
+  };
+
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  function pickNoDupe(arr, lastRef) {
+    if (arr.length === 1) return arr[0];
+    let choice;
+    do { choice = pick(arr); } while (choice === lastRef.val);
+    lastRef.val = choice;
+    return choice;
+  }
+
+  const _lastCap  = { won: { val: null }, lost: { val: null } };
+  const _lastMeme = { won: { val: null }, lost: { val: null } };
+
+  const LOCAL_MEMES = {
+    lost: [
+      'img/lose/approved_crying_cat.jpg',
+      'img/lose/cat_zoning_out.mp4',
+      'img/lose/crying_cat.jpg',
+      'img/lose/grumpy_cat.jpg',
+      'img/lose/salad_cat.webp',
+    ],
+    won: [
+      'img/win/cat_vibing.mp4',
+      'img/win/persian_cat.jpg',
+      'img/win/scared-cat.jpg',
+      'img/win/smiling-cat.jpg',
+    ],
+  };
+
+  function showMeme(type) {
+    const img = document.getElementById('meme-img');
+    const vid = document.getElementById('meme-vid');
+    const cap = document.getElementById('meme-cap');
+
+    img.classList.remove('loaded');
+    vid.classList.remove('loaded');
+    vid.pause();
+
+    cap.textContent = pickNoDupe(MEME_CAPTIONS[type], _lastCap[type]);
+
+    const src = pickNoDupe(LOCAL_MEMES[type], _lastMeme[type]);
+    if (src.endsWith('.mp4')) {
+      vid.src = src;
+      vid.classList.add('loaded');
+      vid.play();
+    } else {
+      img.onload = () => img.classList.add('loaded');
+      img.onerror = () => {};
+      img.src = src;
+    }
+  }
+
   function handleLost() {
     gs = 'lost'; clearInterval(ti);
     for (let mr = 0; mr < ROWS; mr++) for (let mc = 0; mc < COLS; mc++) if (board[mr][mc] === -1) revealed[mr][mc] = true;
     document.getElementById('sb').textContent = '😵';
     const ot = document.getElementById('ot');
     ot.textContent = 'BOOM! 💥'; ot.style.color = '#ff5544';
+    showMeme('lost');
     setTimeout(() => document.getElementById('ov').classList.add('show'), 900);
   }
 
@@ -421,6 +516,7 @@
     document.getElementById('sb').textContent = '😎';
     const ot = document.getElementById('ot');
     ot.textContent = `GEWONNEN! 🎉 ${tv}s`; ot.style.color = DIFFS[currentDiff].color;
+    showMeme('won');
     document.getElementById('ov').classList.add('show');
   }
 
