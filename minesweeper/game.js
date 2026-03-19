@@ -260,6 +260,7 @@
   let vScale = 1, vPanX = 0, vPanY = 0;
   let board, revealed, flagged, qmark, gs, tv, ti, fc, mineCount;
   let playerPos = null, lives = 0, patrolDir = 1, patrolStartCol = 0, patrolEndCol = 0, patrolZoomAnim = null;
+  let patrolSafePath = null, _dbg_sm = false, _dbg_sp = false;
 
   const INSTRUCTIONS = {
     classic: {
@@ -300,7 +301,14 @@
       const startCells = waterCells.filter(w => patrolDir === 1 ? w.c <= patrolStartCol : w.c >= patrolStartCol);
       const sc = startCells[Math.floor(Math.random() * startCells.length)];
       fc = false;
-      placeMines(sc.r, sc.c);
+      let _path = null, _att = 0;
+      while (!_path && _att++ < 100) {
+        if (_att > 1) for (let _r = 0; _r < ROWS; _r++) board[_r].fill(0);
+        placeMines(sc.r, sc.c);
+        _path = findPatrolPath(sc.r, sc.c);
+      }
+      patrolSafePath = _path;
+      _dbg_sm = false; _dbg_sp = false;
       playerPos = { r: sc.r, c: sc.c };
       revealed[sc.r][sc.c] = true;
       const W = canvas.width, H = canvas.height, toScale = 3;
@@ -327,6 +335,7 @@
     const mv = document.getElementById('meme-vid');
     mv.classList.remove('loaded'); mv.pause(); mv.src = '';
     document.getElementById('meme-cap').textContent = '';
+    _upd();
   }
 
   function clampView() {
@@ -352,6 +361,29 @@
         forEachNeighbor(r, c, (nr, nc) => { if (board[nr][nc] === -1) cnt++; });
         board[r][c] = cnt;
       }
+  }
+
+  // BFS: kürzesten Weg vom Start zur Zielzone finden (nur minenfreie Wasserzellen)
+  function findPatrolPath(sr, sc) {
+    const vis = Array.from({ length: ROWS }, () => new Uint8Array(COLS));
+    const par = Array.from({ length: ROWS }, () => new Array(COLS).fill(null));
+    const q = [{ r: sr, c: sc }];
+    vis[sr][sc] = 1;
+    let goal = null;
+    outer: while (q.length) {
+      const { r, c } = q.shift();
+      for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+        const nr = r + dr, nc = c + dc;
+        if (!inBounds(nr, nc) || !P[nr][nc] || board[nr][nc] === -1 || vis[nr][nc]) continue;
+        vis[nr][nc] = 1; par[nr][nc] = { r, c };
+        if (patrolDir === 1 ? nc >= patrolEndCol : nc <= patrolEndCol) { goal = { r: nr, c: nc }; break outer; }
+        q.push({ r: nr, c: nc });
+      }
+    }
+    if (!goal) return null;
+    const path = []; let cur = goal;
+    while (cur) { path.push(cur); cur = par[cur.r][cur.c]; }
+    return path.reverse();
   }
 
   function reveal(r, c) {
@@ -547,6 +579,18 @@
 
     // ── Patrol-Overlays ──────────────────────────────────────────────────────
     if (gameMode === 'patrol') {
+      if (_dbg_sm) {
+        ctx.save(); ctx.fillStyle = 'rgba(255,60,60,0.38)';
+        for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++)
+          if (P[r][c] && board[r][c] === -1) ctx.fillRect(c * CELL, r * CELL, CELL, CELL);
+        ctx.restore();
+      }
+      if (_dbg_sp && patrolSafePath) {
+        ctx.save(); ctx.fillStyle = 'rgba(80,255,130,0.32)';
+        for (const { r, c } of patrolSafePath)
+          ctx.fillRect(c * CELL + 1, r * CELL + 1, CELL - 2, CELL - 2);
+        ctx.restore();
+      }
       // Zielzone: goldene Umrandung der rechten Wasserzellen
       for (const { r: pr, c: pc } of waterCells) {
         if (patrolDir === 1 ? pc >= patrolEndCol : pc <= patrolEndCol) {
@@ -890,7 +934,55 @@
   init();
   drawFrame();
 
+  function _ep() {
+    if (gs === 'idle' || gs === 'won' || gs === 'lost') {
+      init();
+      const seed = waterCells[Math.floor(waterCells.length / 2)];
+      fc = false; gs = 'playing';
+      placeMines(seed.r, seed.c);
+      ti = setInterval(() => {
+        tv = Math.min(999, tv + 1);
+        document.getElementById('tm').textContent = String(tv).padStart(3, '0');
+      }, 1000);
+    }
+  }
+
+  function _upd() {
+    const _el = document.getElementById('_p');
+    if (!_el) return;
+    const _ip = gameMode === 'patrol';
+    const _acts = {
+      sm: () => { _dbg_sm = !_dbg_sm; _upd(); },
+      sp: () => { _dbg_sp = !_dbg_sp; _upd(); },
+      w:  () => { _ep(); for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (P[r][c] && board[r][c] !== -1) revealed[r][c] = true; handleWon(); },
+      l:  () => { _ep(); const m = waterCells.find(({ r, c }) => board[r][c] === -1); if (m) { revealed[m.r][m.c] = true; spawnExplosion(m.r, m.c); handleLost(); } },
+      s:  () => { scores.easy = [42, 67, 91, 110, 134]; scores.medium = [88, 105, 143]; scores.hard = [201, 256]; persistScores(); renderScores(); },
+      x:  () => { scores.easy = []; scores.medium = []; scores.hard = []; persistScores(); renderScores(); },
+      i:  () => init(),
+    };
+    const _defs = _ip
+      ? [['sm', 'Minen ' + (_dbg_sm ? 'aus' : 'ein') + 'blenden'],
+         ['sp', 'Weg ' + (_dbg_sp ? 'aus' : 'an') + 'zeigen'],
+         ['s', 'Testscores laden'], ['x', 'Scores leeren'], ['i', 'Neu starten']]
+      : [['w', 'Sofort gewinnen'], ['l', 'Sofort verlieren'],
+         ['s', 'Testscores laden'], ['x', 'Scores leeren'], ['i', 'Neu starten']];
+    _el.innerHTML = `<div style="font-weight:600;margin-bottom:6px;color:#facc15">\u{1F527} Dev-Panel</div>` +
+      _defs.map(([a, t]) => `<button data-a="${a}">${t}</button>`).join('');
+    _el.querySelectorAll('button').forEach(btn => {
+      Object.assign(btn.style, {
+        display: 'block', width: '100%', textAlign: 'left', background: 'transparent',
+        border: 'none', color: '#94a3b8', fontFamily: 'Inter, sans-serif',
+        fontSize: '12px', padding: '2px 0', cursor: 'pointer', lineHeight: '1.8',
+      });
+      btn.addEventListener('mouseover', () => { btn.style.color = '#e2e8f0'; });
+      btn.addEventListener('mouseout',  () => { btn.style.color = '#94a3b8'; });
+      btn.addEventListener('click', () => { _acts[btn.dataset.a]?.(); });
+    });
+  }
+
   (() => {
+    const _loc = location.hostname;
+    if (_loc !== '' && _loc !== 'localhost' && _loc !== '127.0.0.1') return;
     let _n = 0, _t;
     document.getElementById('ver').addEventListener('click', () => {
       clearTimeout(_t);
@@ -902,7 +994,6 @@
 
       const p = document.createElement('div');
       p.id = '_p';
-      p.innerHTML = new TextDecoder().decode(Uint8Array.from(atob('PGRpdiBzdHlsZT0nZm9udC13ZWlnaHQ6NjAwO21hcmdpbi1ib3R0b206NnB4O2NvbG9yOiNmYWNjMTUnPvCflKcgRGV2LVBhbmVsPC9kaXY+PGRpdiBjbGFzcz0iX3IiPjxrYmQ+Vzwva2JkPiBTb2ZvcnQgZ2V3aW5uZW48L2Rpdj48ZGl2IGNsYXNzPSJfciI+PGtiZD5MPC9rYmQ+IFNvZm9ydCB2ZXJsaWVyZW48L2Rpdj48ZGl2IGNsYXNzPSJfciI+PGtiZD5TPC9rYmQ+IFRlc3RzY29yZXMgbGFkZW48L2Rpdj48ZGl2IGNsYXNzPSJfciI+PGtiZD5YPC9rYmQ+IFNjb3JlcyBsZWVyZW48L2Rpdj48ZGl2IGNsYXNzPSJfciI+PGtiZD5JPC9rYmQ+IE5ldSBzdGFydGVuPC9kaXY+'), c => c.charCodeAt(0)));
       Object.assign(p.style, {
         position: 'fixed', bottom: '16px', right: '16px', zIndex: '9999',
         background: 'rgba(15,23,42,0.95)', border: '1px solid #334155',
@@ -910,60 +1001,8 @@
         color: '#94a3b8', fontFamily: 'Inter, sans-serif', lineHeight: '1.8',
         backdropFilter: 'blur(8px)', boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
       });
-      p.querySelectorAll('._r').forEach(r => Object.assign(r.style, { display: 'flex', gap: '8px', alignItems: 'center' }));
       document.body.appendChild(p);
-      p.querySelectorAll('kbd').forEach(k => Object.assign(k.style, {
-        display: 'inline-block', background: '#1e293b', border: '1px solid #475569',
-        borderRadius: '4px', padding: '0 5px', fontFamily: 'JetBrains Mono, monospace',
-        color: '#e2e8f0', fontSize: '11px', minWidth: '20px', textAlign: 'center',
-      }));
-
-      function _ep() {
-        if (gs === 'idle' || gs === 'won' || gs === 'lost') {
-          init();
-          const seed = waterCells[Math.floor(waterCells.length / 2)];
-          fc = false; gs = 'playing';
-          placeMines(seed.r, seed.c);
-          ti = setInterval(() => {
-            tv = Math.min(999, tv + 1);
-            document.getElementById('tm').textContent = String(tv).padStart(3, '0');
-          }, 1000);
-        }
-      }
-
-      document.addEventListener('keydown', function _h(e) {
-        if (e.target.tagName === 'INPUT') return;
-        if (gameMode === 'patrol') return;
-        switch (e.key.toUpperCase()) {
-          case 'W': {
-            _ep();
-            for (let r = 0; r < ROWS; r++)
-              for (let c = 0; c < COLS; c++)
-                if (P[r][c] && board[r][c] !== -1) revealed[r][c] = true;
-            handleWon();
-            break;
-          }
-          case 'L': {
-            _ep();
-            const mine = waterCells.find(({ r, c }) => board[r][c] === -1);
-            if (mine) { revealed[mine.r][mine.c] = true; spawnExplosion(mine.r, mine.c); handleLost(); }
-            break;
-          }
-          case 'S': {
-            scores.easy   = [42, 67, 91, 110, 134];
-            scores.medium = [88, 105, 143];
-            scores.hard   = [201, 256];
-            persistScores(); renderScores();
-            break;
-          }
-          case 'X': {
-            scores.easy = []; scores.medium = []; scores.hard = [];
-            persistScores(); renderScores();
-            break;
-          }
-          case 'I': { init(); break; }
-        }
-      });
+      _upd();
     });
   })();
 })();
