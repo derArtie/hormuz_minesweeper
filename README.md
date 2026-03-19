@@ -62,7 +62,7 @@ minesweeper/
 
 ## Version
 
-`1.1.0` — Patrouille-Modus, Kamera-Follow, D-Pad für Mobile, dynamische Instruktionen
+`1.1.1` — Dev-Panel lokal-only, klickbare Buttons, 4-direktionaler Lösungsweg, garantierter Durchgang
 
 ## Starten
 
