@@ -586,6 +586,37 @@ canvas {
   font-weight: 700;
 }
 
+#os-diff {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.os-dbtn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 99px;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.os-dbtn:hover {
+  border-color: var(--text-dim);
+  color: var(--text);
+}
+
+.os-dbtn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 #os {
   font-size: 11px;
   color: var(--text-muted);

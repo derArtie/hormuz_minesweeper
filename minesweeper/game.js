@@ -144,6 +144,8 @@
   function updateMineDisplay() {
     if (gameMode === 'patrol') {
       document.getElementById('mc').textContent = String(lives).padStart(3, '0');
+      const fc = flagCount();
+      document.getElementById('mc-label').textContent = fc > 0 ? `Lives  🚩 ${fc}` : 'Lives';
       return;
     }
     document.getElementById('mc').textContent = String(mineCount - flagCount()).padStart(3, '0');
@@ -413,6 +415,26 @@
     return true;
   }
 
+  function spawnConfetti() {
+    const colors = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff922b', '#cc5de8', '#f06595', '#74c0fc'];
+    for (let i = 0; i < 90; i++) {
+      particles.push({
+        type: 'confetti',
+        x: Math.random() * canvas.width,
+        y: -10 - Math.random() * 80,
+        vx: (Math.random() - 0.5) * 2.5,
+        vy: 1.5 + Math.random() * 2.5,
+        life: 1,
+        decay: 0.0025 + Math.random() * 0.004,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        angle: Math.random() * Math.PI * 2,
+        spin: (Math.random() - 0.5) * 0.25,
+        w: 5 + Math.random() * 5,
+        h: 3 + Math.random() * 3,
+      });
+    }
+  }
+
   function spawnExplosion(r, c) {
     const cx = (c + .5) * CELL, cy = (r + .5) * CELL;
     for (let i = 0; i < 28; i++) {
@@ -559,6 +581,8 @@
         const rad = p.maxR * (1 - p.life);
         ctx.save(); ctx.strokeStyle = `rgba(255,180,60,${p.life * .8})`; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(p.x, p.y, rad, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+      } else if (p.type === 'confetti') {
+        p.x += p.vx; p.y += p.vy; p.vy += 0.04; p.vx *= 0.99; p.angle += p.spin;
       } else {
         ctx.save(); ctx.globalAlpha = p.life; ctx.fillStyle = p.color;
         ctx.beginPath(); ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2); ctx.fill(); ctx.restore();
@@ -618,6 +642,17 @@
     }
 
     ctx.restore(); // end pan/zoom transform
+
+    // ── Konfetti (außerhalb Transform, über gesamte Canvas-Fläche) ───────────
+    particles.filter(p => p.type === 'confetti').forEach(p => {
+      ctx.save();
+      ctx.globalAlpha = p.life;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.angle);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    });
 
     // Cursor außerhalb des Transforms in Canvas-Pixelkoordinaten zeichnen
     if (mmPanning) {
@@ -819,16 +854,19 @@
     ot.textContent = gameMode === 'patrol' ? 'VERSUNKEN! 🌊' : 'BOOM! 💥';
     ot.style.color = '#ff5544';
     showMeme('lost');
+    syncOverlayDiff();
     setTimeout(() => document.getElementById('ov').classList.add('show'), OVERLAY_DELAY_MS);
   }
 
   function handleWon() {
     gs = 'won'; clearInterval(ti); saveScore(currentDiff, tv);
+    if (gameMode === 'classic') spawnConfetti();
     document.getElementById('sb').textContent = '😎';
     const ot = document.getElementById('ot');
     ot.textContent = gameMode === 'patrol' ? `DURCHGEBROCHEN! 🚢 ${tv}s` : `GEWONNEN! 🎉 ${tv}s`;
     ot.style.color = DIFFS[currentDiff].color;
     showMeme('won');
+    syncOverlayDiff();
     document.getElementById('ov').classList.add('show');
   }
 
@@ -872,13 +910,26 @@
 
   canvas.addEventListener('contextmenu', e => {
     e.preventDefault();
-    if (gameMode === 'patrol') return;
     if (gs === 'won' || gs === 'lost') return;
     const { r, c } = getCell(e);
     toggleFlag(r, c);
   });
 
-  document.getElementById('ov').addEventListener('click', init);
+  function syncOverlayDiff() {
+    document.querySelectorAll('.os-dbtn').forEach(b => b.classList.toggle('active', b.dataset.d === currentDiff));
+  }
+
+  document.getElementById('ov').addEventListener('click', e => {
+    if (!e.target.closest('.os-dbtn')) init();
+  });
+  document.querySelectorAll('.os-dbtn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      currentDiff = btn.dataset.d;
+      document.querySelectorAll('.dbtn').forEach(b => b.classList.toggle('active', b.dataset.d === currentDiff));
+      init();
+    });
+  });
   document.getElementById('sb').addEventListener('click', init);
   document.getElementById('dn-btn').addEventListener('click', () => {
     dayMode = !dayMode;
