@@ -3,7 +3,9 @@
     "version": "1.1.2",
     "date": "März 2026",
     "items": [
-      "Lebensanzahl im Patrouille-Modus angepasst: Leicht 3, Mittel 5, Schwer 7"
+      "Lebensanzahl im Patrouille-Modus angepasst: Leicht 3, Mittel 5, Schwer 7",
+      "SVG-Favicon mit Anker-Icon im Brand-Design hinzugefügt",
+      "SEO/SEA Meta-Tags ergänzt: Description, Keywords, Open Graph, Twitter Card, Theme-Color"
     ]
   },
   {
