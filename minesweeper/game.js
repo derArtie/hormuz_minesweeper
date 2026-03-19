@@ -1,11 +1,11 @@
 (function () {
-  const VERSION = '1.1.1';
+  const VERSION = '1.1.2';
 
   const COLS = 60, ROWS = 40, CELL = 12;
   const DIFFS = {
-    easy:   { mines: 45,  label: 'Leicht', color: '#44bb66', lives: 2 },
-    medium: { mines: 99,  label: 'Mittel', color: '#e8c040', lives: 4 },
-    hard:   { mines: 150, label: 'Schwer', color: '#ee4444', lives: 6 },
+    easy:   { mines: 45,  label: 'Leicht', color: '#44bb66', lives: 3 },
+    medium: { mines: 99,  label: 'Mittel', color: '#e8c040', lives: 5 },
+    hard:   { mines: 150, label: 'Schwer', color: '#ee4444', lives: 7 },
   };
   let currentDiff = 'easy', dayMode = false, cursorMode = 'default', gameMode = 'classic';
 

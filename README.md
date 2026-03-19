@@ -62,7 +62,7 @@ minesweeper/
 
 ## Version
 
-`1.1.1` — Dev-Panel lokal-only, klickbare Buttons, 4-direktionaler Lösungsweg, garantierter Durchgang
+`1.1.2` — Lebensanzahl Patrouille angepasst (Leicht 3 / Mittel 5 / Schwer 7)
 
 ## Starten
 
