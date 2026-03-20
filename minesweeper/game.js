@@ -1,5 +1,5 @@
 (function () {
-  const VERSION = '1.1.2';
+  const VERSION = '1.1.3';
 
   const COLS = 60, ROWS = 40, CELL = 12;
   const DIFFS = {
@@ -172,6 +172,7 @@
 
     if (revealed[nr][nc]) {
       if (board[nr][nc] === -1) return;
+      shipAnim = { fromR: playerPos.r, fromC: playerPos.c, toR: nr, toC: nc, start: performance.now(), dur: 110 };
       playerPos = { r: nr, c: nc };
       if (patrolDir === 1 ? nc >= patrolEndCol : nc <= patrolEndCol) handleWon();
       return;
@@ -187,6 +188,7 @@
     }
 
     revealed[nr][nc] = true;
+    shipAnim = { fromR: playerPos.r, fromC: playerPos.c, toR: nr, toC: nc, start: performance.now(), dur: 110 };
     playerPos = { r: nr, c: nc };
     if (patrolDir === 1 ? nc >= patrolEndCol : nc <= patrolEndCol) handleWon();
   }
@@ -260,11 +262,13 @@
   let vScale = 1, vPanX = 0, vPanY = 0;
   let board, revealed, flagged, qmark, gs, tv, ti, fc, mineCount;
   let playerPos = null, lives = 0, patrolDir = 1, patrolStartCol = 0, patrolEndCol = 0, patrolZoomAnim = null;
+  let shipAnim = null, focusCell = null, keyboardActive = false;
   let patrolSafePath = null, _dbg_sm = false, _dbg_sp = false;
+  let soundEnabled = true, _audioCtx = null;
 
   const INSTRUCTIONS = {
     classic: {
-      Desktop: [['Left-Click','Scan Sector'],['Right-Click','Place Flag'],['Chord','Click Number'],['Scroll','Zoom In/Out'],['Middle Click','Pan Map']],
+      Desktop: [['Left-Click','Scan Sector'],['Right-Click','Place Flag'],['Chord','Click Number'],['Arrow Keys','Fokus bewegen'],['Enter','Aufdecken'],['Space','Flagge setzen'],['Scroll','Zoom In/Out'],['Middle Click','Pan Map']],
       Mobile:  [['Tap','Scan Sector'],['Long Press','Place Flag'],['Pinch','Zoom In/Out'],['Drag (zoomed)','Pan Map']],
     },
     patrol: {
@@ -290,8 +294,9 @@
     qmark    = Array.from({ length: ROWS }, () => new Array(COLS).fill(false));
     gs = 'idle'; tv = 0; fc = true; particles = [];
     vScale = 1; vPanX = 0; vPanY = 0;
-    playerPos = null;
+    playerPos = null; shipAnim = null;
     patrolZoomAnim = null;
+    focusCell = null; keyboardActive = false;
     clearInterval(ti);
     document.getElementById('tm').textContent = '000';
     if (gameMode === 'patrol') {
@@ -414,12 +419,60 @@
   }
 
   function spawnExplosion(r, c) {
+    playExplosion();
     const cx = (c + .5) * CELL, cy = (r + .5) * CELL;
     for (let i = 0; i < 28; i++) {
       const a = Math.random() * Math.PI * 2, sp = 1.5 + Math.random() * 3.5;
       particles.push({ x: cx, y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1, decay: .018 + Math.random() * .02, size: 2 + Math.random() * 4, color: Math.random() < .5 ? '#ff6600' : '#ffcc00', type: 'ember' });
     }
     particles.push({ x: cx, y: cy, vx: 0, vy: 0, life: 1, decay: .04, size: 0, color: 'ring', type: 'ring', maxR: CELL * 2.5 });
+  }
+
+  // ── Audio (Web Audio API, keine externen Abhängigkeiten) ────────────────
+  function getAudio() {
+    if (!soundEnabled) return null;
+    if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return _audioCtx;
+  }
+
+  function playClick() {
+    const ac = getAudio(); if (!ac) return;
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.connect(g); g.connect(ac.destination);
+    o.type = 'sine';
+    o.frequency.setValueAtTime(900, ac.currentTime);
+    o.frequency.exponentialRampToValueAtTime(500, ac.currentTime + 0.055);
+    g.gain.setValueAtTime(0.12, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.055);
+    o.start(); o.stop(ac.currentTime + 0.055);
+  }
+
+  function playExplosion() {
+    const ac = getAudio(); if (!ac) return;
+    const len = Math.floor(ac.sampleRate * 0.55);
+    const buf = ac.createBuffer(1, len, ac.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 1.8);
+    const src = ac.createBufferSource(), filt = ac.createBiquadFilter(), g = ac.createGain();
+    filt.type = 'lowpass'; filt.frequency.value = 280;
+    src.buffer = buf; src.connect(filt); filt.connect(g); g.connect(ac.destination);
+    g.gain.setValueAtTime(0.85, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.55);
+    src.start();
+  }
+
+  function playFanfare() {
+    const ac = getAudio(); if (!ac) return;
+    [[523, 0], [659, 0.13], [784, 0.26], [1047, 0.39], [784, 0.52], [1047, 0.62]].forEach(([freq, delay]) => {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'triangle'; o.connect(g); g.connect(ac.destination);
+      const t = ac.currentTime + delay;
+      o.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.18, t + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+      o.start(t); o.stop(t + 0.22);
+    });
   }
 
   function col() {
@@ -577,6 +630,15 @@
       }
     }
 
+    // ── Tastatur-Fokus (Classic) ──────────────────────────────────────────────
+    if (gameMode === 'classic' && keyboardActive && focusCell && inBounds(focusCell.r, focusCell.c)) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,230,50,0.92)';
+      ctx.lineWidth = 1.8;
+      ctx.strokeRect(focusCell.c * CELL + 1, focusCell.r * CELL + 1, CELL - 2, CELL - 2);
+      ctx.restore();
+    }
+
     // ── Patrol-Overlays ──────────────────────────────────────────────────────
     if (gameMode === 'patrol') {
       if (_dbg_sm) {
@@ -598,9 +660,18 @@
           ctx.strokeRect(pc * CELL + 0.75, pr * CELL + 0.75, CELL - 1.5, CELL - 1.5); ctx.restore();
         }
       }
-      // Spieler-Marker
+      // Spieler-Marker (mit Slide-Animation)
       if (playerPos) {
-        const px = playerPos.c * CELL, py = playerPos.r * CELL;
+        let drawR = playerPos.r, drawC = playerPos.c;
+        if (shipAnim) {
+          const elapsed = ts - shipAnim.start;
+          const t = Math.min(1, elapsed / shipAnim.dur);
+          const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+          drawR = shipAnim.fromR + (shipAnim.toR - shipAnim.fromR) * ease;
+          drawC = shipAnim.fromC + (shipAnim.toC - shipAnim.fromC) * ease;
+          if (t >= 1) shipAnim = null;
+        }
+        const px = drawC * CELL, py = drawR * CELL;
         ctx.save();
         ctx.font = `${CELL - 1}px serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText('🚢', px + CELL / 2, py + CELL / 2 + 1);
@@ -659,6 +730,7 @@
 
   canvas.addEventListener('mousemove', e => {
     if (touchActive) return;
+    if (keyboardActive) keyboardActive = false;
     if (mmPanning) {
       const rect = canvas.getBoundingClientRect();
       const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
@@ -823,7 +895,7 @@
   }
 
   function handleWon() {
-    gs = 'won'; clearInterval(ti); saveScore(currentDiff, tv);
+    gs = 'won'; clearInterval(ti); saveScore(currentDiff, tv); playFanfare();
     document.getElementById('sb').textContent = '😎';
     const ot = document.getElementById('ot');
     ot.textContent = gameMode === 'patrol' ? `DURCHGEBROCHEN! 🚢 ${tv}s` : `GEWONNEN! 🎉 ${tv}s`;
@@ -855,19 +927,57 @@
       ti = setInterval(() => { tv = Math.min(999, tv + 1); document.getElementById('tm').textContent = String(tv).padStart(3, '0'); }, 1000);
     }
     if (board[r][c] === -1) { revealed[r][c] = true; spawnExplosion(r, c); handleLost(); }
-    else { reveal(r, c); if (checkWin()) handleWon(); }
+    else { playClick(); reveal(r, c); if (checkWin()) handleWon(); }
   });
 
   document.getElementById('gw').addEventListener('selectstart', e => e.preventDefault());
 
   document.addEventListener('keydown', e => {
-    if (gameMode !== 'patrol') return;
     if (gs === 'won' || gs === 'lost') return;
-    const dirs = { ArrowUp: [-1,0], ArrowDown: [1,0], ArrowLeft: [0,-1], ArrowRight: [0,1] };
-    const dir = dirs[e.key] ?? (e.key === 'w' || e.key === 'W' ? [-1,0] : e.key === 's' || e.key === 'S' ? [1,0] : e.key === 'a' || e.key === 'A' ? [0,-1] : e.key === 'd' || e.key === 'D' ? [0,1] : null);
-    if (!dir) return;
-    e.preventDefault();
-    tryPatrolMove(dir[0], dir[1]);
+
+    if (gameMode === 'patrol') {
+      const dirs = { ArrowUp: [-1,0], ArrowDown: [1,0], ArrowLeft: [0,-1], ArrowRight: [0,1] };
+      const dir = dirs[e.key] ?? (e.key === 'w' || e.key === 'W' ? [-1,0] : e.key === 's' || e.key === 'S' ? [1,0] : e.key === 'a' || e.key === 'A' ? [0,-1] : e.key === 'd' || e.key === 'D' ? [0,1] : null);
+      if (!dir) return;
+      e.preventDefault();
+      tryPatrolMove(dir[0], dir[1]);
+      return;
+    }
+
+    if (gameMode === 'classic') {
+      const arrowDirs = { ArrowUp: [-1,0], ArrowDown: [1,0], ArrowLeft: [0,-1], ArrowRight: [0,1] };
+      const dir = arrowDirs[e.key];
+      if (dir) {
+        e.preventDefault();
+        keyboardActive = true;
+        if (!focusCell) { focusCell = waterCells[Math.floor(waterCells.length / 2)]; return; }
+        let { r, c } = focusCell;
+        let nr = r + dir[0], nc = c + dir[1];
+        // Überspringe nicht spielbare Zellen
+        while (inBounds(nr, nc) && !P[nr][nc]) { nr += dir[0]; nc += dir[1]; }
+        if (inBounds(nr, nc) && P[nr][nc]) focusCell = { r: nr, c: nc };
+        return;
+      }
+      if (e.key === 'Enter' && focusCell) {
+        e.preventDefault();
+        keyboardActive = true;
+        const { r, c } = focusCell;
+        if (!P[r][c] || flagged[r][c] || qmark[r][c] || revealed[r][c]) return;
+        if (fc) {
+          fc = false; gs = 'playing'; placeMines(r, c);
+          ti = setInterval(() => { tv = Math.min(999, tv + 1); document.getElementById('tm').textContent = String(tv).padStart(3, '0'); }, 1000);
+        }
+        if (board[r][c] === -1) { revealed[r][c] = true; spawnExplosion(r, c); handleLost(); }
+        else { playClick(); reveal(r, c); if (checkWin()) handleWon(); }
+        return;
+      }
+      if (e.key === ' ' && focusCell) {
+        e.preventDefault();
+        keyboardActive = true;
+        toggleFlag(focusCell.r, focusCell.c);
+        return;
+      }
+    }
   });
 
   canvas.addEventListener('contextmenu', e => {
@@ -880,6 +990,12 @@
 
   document.getElementById('ov').addEventListener('click', init);
   document.getElementById('sb').addEventListener('click', init);
+  document.getElementById('snd-btn').addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    document.getElementById('snd-icon-on').style.display  = soundEnabled ? '' : 'none';
+    document.getElementById('snd-icon-off').style.display = soundEnabled ? 'none' : '';
+  });
+
   document.getElementById('dn-btn').addEventListener('click', () => {
     dayMode = !dayMode;
     document.getElementById('gw').classList.toggle('day', dayMode);

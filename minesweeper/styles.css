@@ -228,6 +228,7 @@ body {
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  gap: 2px;
 }
 
 /* ── Cursor Picker ─────────────────────────────────────── */
@@ -302,9 +303,21 @@ body {
   line-height: 1;
 }
 
-#dn-btn:hover {
-  color: var(--text);
+#dn-btn:hover { color: var(--text); }
+
+#snd-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
 }
+
+#snd-btn:hover { color: var(--accent); }
 
 #cl-btn {
   background: transparent;
