@@ -290,21 +290,23 @@
       <div class="card-title">Spielprinzip</div>
       <p>
         Ein browser-basiertes Minesweeper auf einer stilisierten Karte des Persischen Golfs.
-        Decke Wasserzellen auf und vermeide die versteckten Seeminen.
-        Markiere verdächtige Felder mit einer Flagge, um das Spielfeld zu kartieren —
-        der erste Klick ist immer sicher.
+        Wähle zwischen zwei Spielmodi: Im <strong style="color:#f1f5f9">Klassisch</strong>-Modus deckst du alle sicheren Wasserzellen auf,
+        ohne eine Seeminne zu treffen — der erste Klick ist immer sicher.
+        Im <strong style="color:#f1f5f9">Patrouille</strong>-Modus navigierst du dein Schiff von einer Seite der Karte zur anderen
+        und weichst dabei Minen aus.
       </p>
     </div>
 
     <!-- Steuerung -->
     <div class="card">
-      <div class="card-title">Steuerung</div>
+      <div class="card-title">Steuerung — Klassisch</div>
       <div class="controls-grid">
         <div>
-          <div class="ctrl-group-label">Desktop</div>
+          <div class="ctrl-group-label">Desktop / Tastatur</div>
           <ul class="ctrl-list">
-            <li><span class="action">Zelle aufdecken</span><span class="key">Linksklick</span></li>
-            <li><span class="action">Flagge setzen</span><span class="key">Rechtsklick</span></li>
+            <li><span class="action">Zelle aufdecken</span><span class="key">Linksklick / Enter</span></li>
+            <li><span class="action">Flagge setzen</span><span class="key">Rechtsklick / Leertaste</span></li>
+            <li><span class="action">Fokus bewegen</span><span class="key">Pfeiltasten</span></li>
             <li><span class="action">Chord-Reveal</span><span class="key">Klick auf Zahl</span></li>
             <li><span class="action">Zoom</span><span class="key">Scroll</span></li>
           </ul>
@@ -314,6 +316,29 @@
           <ul class="ctrl-list">
             <li><span class="action">Zelle aufdecken</span><span class="key">Tap</span></li>
             <li><span class="action">Flagge setzen</span><span class="key">Long Press</span></li>
+            <li><span class="action">Zoom</span><span class="key">Pinch</span></li>
+            <li><span class="action">Karte verschieben</span><span class="key">Drag</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Steuerung Patrouille -->
+    <div class="card">
+      <div class="card-title">Steuerung — Patrouille</div>
+      <div class="controls-grid">
+        <div>
+          <div class="ctrl-group-label">Desktop</div>
+          <ul class="ctrl-list">
+            <li><span class="action">Schiff bewegen</span><span class="key">W A S D / Pfeiltasten</span></li>
+            <li><span class="action">Flagge setzen</span><span class="key">Rechtsklick</span></li>
+            <li><span class="action">Zoom</span><span class="key">Scroll</span></li>
+          </ul>
+        </div>
+        <div>
+          <div class="ctrl-group-label">Mobile</div>
+          <ul class="ctrl-list">
+            <li><span class="action">Schiff bewegen</span><span class="key">D-Pad (unten links)</span></li>
             <li><span class="action">Zoom</span><span class="key">Pinch</span></li>
             <li><span class="action">Karte verschieben</span><span class="key">Drag</span></li>
           </ul>
@@ -348,10 +373,13 @@
       <div class="card-title">Features</div>
       <ul class="feature-list">
         <li><span class="feat-icon">🗺️</span><span>Kartenansicht mit Länderbeschriftungen — Persischer Golf, Straße von Hormuz, Golf von Oman</span></li>
+        <li><span class="feat-icon">🚢</span><span>Patrouille-Modus: Navigiere dein Schiff von einer Seite zur anderen — mit 1–3 Leben je Schwierigkeit und Slide-Animation</span></li>
+        <li><span class="feat-icon">⌨️</span><span>Tastatursteuerung im Klassisch-Modus: Pfeiltasten zum Navigieren, Enter zum Aufdecken, Leertaste für Flaggen</span></li>
+        <li><span class="feat-icon">🔊</span><span>Sound-Effekte via Web Audio API: Klick beim Aufdecken, Explosion bei Mine, Fanfare beim Sieg — per Button stummschaltbar</span></li>
+        <li><span class="feat-icon">🎉</span><span>Konfetti-Animation beim Sieg und Schwierigkeitsauswahl direkt im Spielende-Overlay</span></li>
         <li><span class="feat-icon">🌊</span><span>Animiertes Wasser mit Wellenbewegung und Partikeleffekte bei Explosionen</span></li>
         <li><span class="feat-icon">🔍</span><span>Pan &amp; Zoom — auf Desktop per Scroll, auf Mobile per Pinch &amp; Drag</span></li>
         <li><span class="feat-icon">🌙</span><span>Tag/Nacht-Modus umschaltbar</span></li>
-        <li><span class="feat-icon">🚢</span><span>Schiff-Cursor auf spielbaren Feldern</span></li>
         <li><span class="feat-icon">🏆</span><span>Persistente Bestzeiten pro Schwierigkeitsgrad (Top 5) — bleiben nach Reload erhalten</span></li>
         <li><span class="feat-icon">😹</span><span>Katzen-Memes beim Gewinnen und Verlieren mit zufälligen Sprüchen</span></li>
         <li><span class="feat-icon">📱</span><span>Vollständig mobiloptimiert — kein Download, läuft direkt im Browser</span></li>

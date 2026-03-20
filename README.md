@@ -30,6 +30,10 @@ Navigiere von einer Seite der Karte zur anderen. Das Schiff wird automatisch am 
 
 - Zwei Spielmodi: Klassisch und Patrouille
 - Kartenansicht des Persischen Golfs mit Länderbeschriftungen (Iran, Saudi-Arabien, Katar, VAE, Oman)
+- Tastatursteuerung im Klassisch-Modus: Pfeiltasten navigieren, Enter aufdecken, Leertaste Flagge
+- Sound-Effekte via Web Audio API (Aufdecken, Explosion, Sieg-Fanfare) — per Button stummschaltbar
+- Konfetti-Animation beim Sieg; Schwierigkeitsauswahl direkt im Spielende-Overlay
+- Schiff-Slide-Animation im Patrouille-Modus (statt Teleport)
 - Animiertes Wasser mit Wellenbewegung, Emboss-Effekt auf Landkacheln
 - Partikeleffekte bei Explosionen
 - Tag/Nacht-Modus (☀️ / 🌙)
@@ -62,7 +66,7 @@ minesweeper/
 
 ## Version
 
-`1.1.2` — Lebensanzahl Patrouille angepasst (Leicht 3 / Mittel 5 / Schwer 7)
+`1.1.3` — Tastatursteuerung (Klassisch), Schiff-Slide-Animation, Sound-Effekte
 
 ## Starten
 
