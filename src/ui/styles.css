@@ -736,6 +736,10 @@ html.day .smiley {
   .dpad {
     bottom: calc(96px + env(safe-area-inset-bottom));
   }
+
+  .hint-toast {
+    bottom: calc(186px + env(safe-area-inset-bottom));
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

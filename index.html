@@ -4,24 +4,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hormuz Strategic — Maritimes Minesweeper im Persischen Golf</title>
+  <title>Hormuz Strategic — Maritimes 3D-Minesweeper im Persischen Golf</title>
 
   <!-- SEO -->
-  <meta name="description" content="Hormuz Strategic: Browser-basiertes Minesweeper auf der Karte des Persischen Golfs. Räume Seeminen auf oder navigiere im Patrouille-Modus durch die Straße von Hormuz — in drei Schwierigkeitsgraden.">
-  <meta name="keywords" content="Minesweeper, Browser-Spiel, Persischer Golf, Straße von Hormuz, Seeminen, Strategie, Patrouille, kostenloses Spiel">
+  <meta name="description" content="Hormuz Strategic: 3D-Minesweeper auf der Karte des Persischen Golfs. Räume Seeminen auf oder navigiere im Patrouille-Modus durch die Straße von Hormuz — in drei Schwierigkeitsgraden.">
+  <meta name="keywords" content="Minesweeper, 3D, Browser-Spiel, Persischer Golf, Straße von Hormuz, Seeminen, Strategie, Patrouille, kostenloses Spiel">
   <meta name="author" content="Hormuz Strategic">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#0f172a">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Hormuz Strategic — Maritimes Minesweeper">
+  <meta property="og:title" content="Hormuz Strategic — Maritimes 3D-Minesweeper">
   <meta property="og:description" content="Räume Seeminen auf oder patrouilliere durch die Straße von Hormuz. Zwei Spielmodi, drei Schwierigkeitsgrade — kostenlos im Browser.">
   <meta property="og:locale" content="de_DE">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Hormuz Strategic — Maritimes Minesweeper">
+  <meta name="twitter:title" content="Hormuz Strategic — Maritimes 3D-Minesweeper">
   <meta name="twitter:description" content="Räume Seeminen auf oder patrouilliere durch die Straße von Hormuz. Zwei Spielmodi, drei Schwierigkeitsgrade — kostenlos im Browser.">
 
   <!-- Favicon -->
@@ -289,7 +289,7 @@
     <div class="card">
       <div class="card-title">Spielprinzip</div>
       <p>
-        Ein browser-basiertes Minesweeper auf einer stilisierten Karte des Persischen Golfs.
+        Ein browser-basiertes 3D-Minesweeper (Three.js) auf einer stilisierten Karte des Persischen Golfs.
         Wähle zwischen zwei Spielmodi: Im <strong style="color:#f1f5f9">Klassisch</strong>-Modus deckst du alle sicheren Wasserzellen auf,
         ohne eine Seeminne zu treffen — der erste Klick ist immer sicher.
         Im <strong style="color:#f1f5f9">Patrouille</strong>-Modus navigierst du dein Schiff von einer Seite der Karte zur anderen
@@ -372,15 +372,16 @@
     <div class="card">
       <div class="card-title">Features</div>
       <ul class="feature-list">
+        <li><span class="feat-icon">🧊</span><span>Echtes 3D mit Three.js: animiertes Wasser mit Wellen-Shader, Low-Poly-Terrain mit Höhenrelief, geneigte Top-Down-Kamera</span></li>
         <li><span class="feat-icon">🗺️</span><span>Kartenansicht mit Länderbeschriftungen — Persischer Golf, Straße von Hormuz, Golf von Oman</span></li>
-        <li><span class="feat-icon">🚢</span><span>Patrouille-Modus: Navigiere dein Schiff von einer Seite zur anderen — mit 1–3 Leben je Schwierigkeit und Slide-Animation</span></li>
-        <li><span class="feat-icon">⌨️</span><span>Tastatursteuerung im Klassisch-Modus: Pfeiltasten zum Navigieren, Enter zum Aufdecken, Leertaste für Flaggen</span></li>
+        <li><span class="feat-icon">🚢</span><span>Patrouille-Modus: sichtbares 3D-Schiff mit Schaukeln und Kielwasser — 1–3 Leben je Schwierigkeit</span></li>
+        <li><span class="feat-icon">💥</span><span>Zellen versinken mit Wasserspritzern, Explosionen mit Partikeln, Lichtblitz und Kamera-Shake</span></li>
+        <li><span class="feat-icon">⌨️</span><span>Vollständige Tastatursteuerung: Pfeiltasten, Enter, Leertaste — plus ARIA-Ansagen für Screenreader</span></li>
         <li><span class="feat-icon">🔊</span><span>Sound-Effekte via Web Audio API: Klick beim Aufdecken, Explosion bei Mine, Fanfare beim Sieg — per Button stummschaltbar</span></li>
         <li><span class="feat-icon">🎉</span><span>Konfetti-Animation beim Sieg und Schwierigkeitsauswahl direkt im Spielende-Overlay</span></li>
-        <li><span class="feat-icon">🌊</span><span>Animiertes Wasser mit Wellenbewegung und Partikeleffekte bei Explosionen</span></li>
-        <li><span class="feat-icon">🔍</span><span>Pan &amp; Zoom — auf Desktop per Scroll, auf Mobile per Pinch &amp; Drag</span></li>
-        <li><span class="feat-icon">🌙</span><span>Tag/Nacht-Modus umschaltbar</span></li>
-        <li><span class="feat-icon">🏆</span><span>Persistente Bestzeiten pro Schwierigkeitsgrad (Top 5) — bleiben nach Reload erhalten</span></li>
+        <li><span class="feat-icon">🔍</span><span>Pan &amp; Zoom mit weichem Damping — auf Desktop per Scroll, auf Mobile per Pinch &amp; Drag</span></li>
+        <li><span class="feat-icon">🌙</span><span>Tag/Nacht-Modus mit echtem Lichtwechsel — nachts Mondlicht und Leuchtbojen</span></li>
+        <li><span class="feat-icon">🏆</span><span>Persistente Bestzeiten pro Modus und Schwierigkeitsgrad (Top 5) — Zeiten aus v1 werden übernommen</span></li>
         <li><span class="feat-icon">😹</span><span>Katzen-Memes beim Gewinnen und Verlieren mit zufälligen Sprüchen</span></li>
         <li><span class="feat-icon">📱</span><span>Vollständig mobiloptimiert — kein Download, läuft direkt im Browser</span></li>
       </ul>

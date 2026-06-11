@@ -92,7 +92,7 @@ export class CameraRig {
   /** Sanfter Flug zu Zelle + Zoomstufe (Patrouille-Intro). */
   flyTo(cell: Cell, zoom: number, duration: number): void {
     const to = cellToWorld(cell);
-    this.clampTargetForZoom(to, zoom);
+    this.clampToMap(to);
     this.fly = {
       fromTarget: this.target.clone(),
       toTarget: to,
@@ -127,8 +127,10 @@ export class CameraRig {
       if (this.fly.t >= 1) this.fly = null;
     } else {
       if (this.followCell && this.desiredZoom > 1.05) {
+        // Schiff immer im Bild halten: nur auf die Kartenränder clampen,
+        // nicht auf den zoomabhängigen Pan-Bereich (Start liegt am Rand)
         this.desiredTarget.copy(cellToWorld(this.followCell));
-        this.clampTarget(this.desiredTarget);
+        this.clampToMap(this.desiredTarget);
       }
       const k = 1 - Math.exp(-dt * 10);
       this.target.lerp(this.desiredTarget, k);
@@ -176,6 +178,12 @@ export class CameraRig {
     const f = 1 - 1 / zoom;
     v.x = THREE.MathUtils.clamp(v.x, (-COLS / 2) * f, (COLS / 2) * f);
     v.z = THREE.MathUtils.clamp(v.z, (-ROWS / 2) * f, (ROWS / 2) * f);
+    v.y = 0;
+  }
+
+  private clampToMap(v: THREE.Vector3): void {
+    v.x = THREE.MathUtils.clamp(v.x, -COLS / 2 + 3, COLS / 2 - 3);
+    v.z = THREE.MathUtils.clamp(v.z, -ROWS / 2 + 3, ROWS / 2 - 3);
     v.y = 0;
   }
 

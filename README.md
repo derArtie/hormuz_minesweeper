@@ -1,73 +1,104 @@
-# Hormuz Minesweeper
+# Hormuz Strategic 2.0
 
-Ein browser-basiertes Minesweeper-Spiel, das auf einer stilisierten Karte der Straße von Hormuz und des Persischen Golfs spielt. Minen sind als Seeminen im Wasser versteckt.
+Maritimes 3D-Minesweeper auf einer stilisierten Karte des Persischen Golfs — gebaut mit
+Three.js, läuft komplett im Browser. Minen sind als Seeminen im Wasser versteckt; nur
+Wasserzellen sind spielbar, Landzellen sind Low-Poly-Terrain.
+
+> **Screenshots:** _Platzhalter — folgen._
+> `docs/screenshots/classic-night.png` · `docs/screenshots/patrol-day.png`
 
 ## Spielmodi
 
-### Klassisch
-Decke alle sicheren Wasserzellen auf, ohne eine Mine zu treffen.
+### ⚓ Klassisch
+Decke alle sicheren Wasserzellen auf, ohne eine Seemine zu treffen. Der erste Klick ist
+immer sicher (3×3-Umfeld minenfrei). Klick auf eine erfüllte Zahl löst einen Chord-Reveal aus.
 
-**Steuerung Desktop:** Linksklick — Aufdecken · Rechtsklick — Flagge · Chord — Zahl klicken · Scroll — Zoom · Mitteltaste — Schwenken
-
-**Steuerung Mobile:** Tap — Aufdecken · Long Press — Flagge · Pinch — Zoom · Drag (gezoomt) — Schwenken
-
-### Patrouille
-Navigiere von einer Seite der Karte zur anderen. Das Schiff wird automatisch am Rand platziert, Startseite und Position sind zufällig. Je nach Schwierigkeitsgrad stehen 1–3 Leben zur Verfügung.
-
-**Steuerung Desktop:** W/A/S/D oder Pfeiltasten — Schiff bewegen · Scroll — Zoom · Mitteltaste — Schwenken
-
-**Steuerung Mobile:** D-Pad (unten links) — Schiff bewegen · Pinch — Zoom · Drag (gezoomt) — Schwenken
+### 🚢 Patrouille
+Navigiere das Patrouillenschiff von einer Kartenseite zur anderen, ohne auf Minen zu laufen.
+Ein minenfreier Pfad ist garantiert; bekannte Minen blockieren den Kurs. Leben je
+Schwierigkeitsgrad: Leicht 3 · Mittel 2 · Schwer 1.
 
 ## Schwierigkeitsgrade
 
-| Stufe  | Seeminen |
-|--------|----------|
-| Leicht | 45       |
-| Mittel | 99       |
-| Schwer | 150      |
+| Stufe  | Seeminen | Leben (Patrouille) |
+|--------|----------|--------------------|
+| Leicht | 45       | 3                  |
+| Mittel | 99       | 2                  |
+| Schwer | 150      | 1                  |
+
+## Steuerung
+
+| | Desktop | Mobile |
+|---|---|---|
+| Aufdecken | Linksklick / Enter | Tap |
+| Flagge → Fragezeichen | Rechtsklick / Leertaste | Long-Press |
+| Chord | Klick auf Zahl | Tap auf Zahl |
+| Fokus / Schiff | Pfeiltasten (Klassisch) · WASD/Pfeile (Patrouille) | D-Pad (Patrouille) |
+| Zoom / Pan | Scroll · Mitteltaste/Drag | Pinch · Drag |
+| Shortcuts | `?` Hilfe · `M` Sound · `N` Tag/Nacht · `R` Neue Mission | — |
 
 ## Features
 
-- Zwei Spielmodi: Klassisch und Patrouille
-- Kartenansicht des Persischen Golfs mit Länderbeschriftungen (Iran, Saudi-Arabien, Katar, VAE, Oman)
-- Tastatursteuerung im Klassisch-Modus: Pfeiltasten navigieren, Enter aufdecken, Leertaste Flagge
-- Sound-Effekte via Web Audio API (Aufdecken, Explosion, Sieg-Fanfare) — per Button stummschaltbar
-- Konfetti-Animation beim Sieg; Schwierigkeitsauswahl direkt im Spielende-Overlay
-- Schiff-Slide-Animation im Patrouille-Modus (statt Teleport)
-- Animiertes Wasser mit Wellenbewegung, Emboss-Effekt auf Landkacheln
-- Partikeleffekte bei Explosionen
-- Tag/Nacht-Modus (☀️ / 🌙)
-- Cursor-Auswahl: Standard, Fadenkreuz oder Schiff (Desktop)
-- Pan & Zoom: Pinch auf Mobile, Scroll auf Desktop, Mitteltaste zum Schwenken
-- Kamera folgt dem Schiff im Patrouille-Modus mit sanftem Zoom-Intro
-- D-Pad-Overlay für Mobile im Patrouille-Modus
-- Persistente Bestzeiten via localStorage (Top 5 pro Schwierigkeitsgrad)
-- Erster Klick ist immer sicher (keine Mine im 3×3-Bereich)
-- Meme-Einblendung beim Gewinnen / Verlieren
-- Protocol Instructions wechseln dynamisch je nach Spielmodus
-- Modernes UI im maritimen Dark-Design
-- Fonts lokal eingebunden (DSGVO-konform, kein Google CDN)
-- Changelog-Modal mit Versionshistorie
+- **3D-Szene**: animiertes Wasser (Custom-Shader mit Wellen und Sonnenglitzern),
+  Low-Poly-Terrain mit Küstenrelief, im Raum verankerte Länderbeschriftungen (CSS2D)
+- **Befriedigendes Aufdecken**: Zellen versinken gestaffelt mit Wasserspritzern,
+  farbcodierte Zahlen wie im klassischen Minesweeper
+- **Explosionen**: Partikel, Lichtblitz, dezenter Kamera-Shake (entfällt bei
+  `prefers-reduced-motion`)
+- **Patrouillenschiff**: Low-Poly-Modell mit Schaukeln, Slide-Animation, Kielwasser
+  und Navigationslicht; pulsierende goldene Zielzone
+- **Tag/Nacht-Modus**: echter Lichtwechsel in der Szene mit sanfter Überblendung,
+  nachts Mondlicht und Leuchtbojen
+- **Modernes UI**: Glassmorphism-HUD (Minen-Counter, Mission Clock, Leben, Smiley-Reset),
+  animierte End-Overlays mit Katzen-Memes, Bestzeiten-Vergleich und direktem
+  Schwierigkeits-/Moduswechsel, Hilfe-Overlay (`?`), Erststart-Hints
+- **Sound**: Web Audio API (Klick, Plopp, Explosion, Sieg-Fanfare), stummschaltbar
+- **Konfetti** beim Sieg im Klassisch-Modus
+- **Accessibility**: vollständige Tastatursteuerung mit sichtbarem 3D-Fokus,
+  ARIA-Live-Ansagen für Spielereignisse, Touch-Targets ≥ 44 px
+- **Persistenz**: Top-5-Bestzeiten pro Modus und Schwierigkeitsgrad in localStorage;
+  Bestzeiten aus v1 werden automatisch migriert
+- **Performance**: InstancedMesh für alle Zellobjekte, gepoolte GPU-Partikel,
+  PixelRatio-Cap, ein einziges animiertes Wasser-Mesh
 
-## Dateistruktur
+## Tech-Stack
+
+- [Three.js](https://threejs.org/) — einzige große Runtime-Dependency
+- [Vite](https://vite.dev/) + TypeScript (strict mode)
+- [Vitest](https://vitest.dev/) für die Spiellogik-Tests, ESLint + Prettier
+- Spiellogik (`src/engine/`) ist framework-frei und vom Rendering strikt getrennt
 
 ```
-index.html          — Startseite
-minesweeper/
-  index.html        — Spielseite
-  game.js           — Spiellogik und Canvas-Rendering
-  styles.css        — Styling (Layout, Farben, UI-Komponenten)
-  fonts.css         — Lokale @font-face Deklarationen (Inter, JetBrains Mono)
-  fonts/            — Schriftdateien (woff2)
-  changelog.json    — Versionshistorie
-  memes.json        — Meme-Bilder und Captions
-  img/              — Bilder und Medien
+src/
+  engine/   Spiellogik: Karte, Board, Patrouille-BFS, Scores (+ Tests)
+  state/    Persistente Einstellungen
+  render/   Three.js: Wasser, Terrain, Tiles, Schiff, Effekte, Tag/Nacht
+  ui/       HUD, Overlays, Eingabe (Maus/Touch/Tastatur), D-Pad, Styles
+  audio/    Web-Audio-Soundeffekte
+public/     Statische Assets (Fonts, Memes, Changelog, CNAME)
 ```
+
+## Lokale Entwicklung
+
+```bash
+npm install
+npm run dev        # Dev-Server → http://localhost:5173/minesweeper/
+npm test           # Engine-Unit-Tests (Vitest)
+npm run lint       # ESLint
+npm run build      # Type-Check + Production-Build nach dist/
+npm run preview    # Production-Build lokal testen
+```
+
+## Deployment
+
+Push auf `main` baut und deployt automatisch über die GitHub Action
+([.github/workflows/deploy.yml](.github/workflows/deploy.yml)) auf GitHub Pages.
+
+> **Einmalig nötig:** In den Repo-Settings unter *Pages* die Source auf
+> **„GitHub Actions"** umstellen (bisher „Deploy from a branch").
+> Die Custom Domain (`heyartur.de`) bleibt erhalten — die CNAME-Datei
+> liegt in `public/` und landet im Build.
 
 ## Version
 
-`1.1.3` — Tastatursteuerung (Klassisch), Schiff-Slide-Animation, Sound-Effekte
-
-## Starten
-
-`index.html` im Browser öffnen — keine Installation oder Build-Schritt erforderlich.
+`2.0.0` — 3D-Remake mit Three.js. Historie im Changelog-Modal im Spiel.
