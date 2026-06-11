@@ -65,10 +65,8 @@ export class HeroScene {
   private flashT = 0;
   private scrollProgress = 0;
 
-  /** Seitliche Reichweite der Patrouillenroute — aspektabhängig, damit das Schiff im Bild bleibt. */
+  /** Seitliche Reichweite der Schiffsdrift — aspektabhängig, damit das Schiff im Bild bleibt. */
   private shipRange = 3;
-  private shipYaw = 0;
-  private readonly prevShipPos = new THREE.Vector3();
 
   constructor(private readonly container: HTMLElement) {
     this.reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -206,11 +204,13 @@ export class HeroScene {
     const t = this.time;
     this.water.uniforms.uTime.value = t;
 
-    // Schiff: patrouilliert zwischen linkem Bildrand und Bildmitte (mit Wende),
-    // weicht leicht in der Tiefe aus und reitet auf den Wellen
+    // Schiff: Laufband-Illusion — der Bug zeigt konsequent nach vorn (+X),
+    // die See samt Minen strömt schneller entgegen, als das Schiff im Bild
+    // driftet (max. Driftgeschwindigkeit ≈ 0.3 ≪ MINE_SPEED). Die langsame
+    // Drift zwischen linkem Drittel und Bildmitte hält es immer im Frame.
     const r = this.shipRange;
-    const shipX = -r * 0.35 + r * 0.65 * Math.sin(t * 0.12);
-    const shipZ = 2.4 + Math.sin(t * 0.07) * 1.2;
+    const shipX = -r * 0.35 + r * 0.65 * Math.sin(t * 0.08);
+    const shipZ = 2.4 + Math.sin(t * 0.06) * 1.2;
     const e = 0.6;
     const h = waveHeight(shipX, shipZ, t, this.amp);
     const hx = (waveHeight(shipX + e, shipZ, t, this.amp) - waveHeight(shipX - e, shipZ, t, this.amp)) / (2 * e);
@@ -218,19 +218,8 @@ export class HeroScene {
     this.ship.position.set(shipX, h + 0.05, shipZ);
     this.ship.rotation.z = -Math.atan(hx) * 0.7 + Math.sin(t * 1.4) * 0.02;
     this.ship.rotation.x = Math.atan(hz) * 0.7;
-
-    // Bug zeigt in Fahrtrichtung; an den Wendepunkten dreht das Schiff langsam um
-    const vx = shipX - this.prevShipPos.x;
-    const vz = shipZ - this.prevShipPos.z;
-    if (dt > 0 && Math.hypot(vx, vz) / dt > 0.12) {
-      const target = Math.atan2(-vz, vx);
-      let delta = target - this.shipYaw;
-      while (delta > Math.PI) delta -= Math.PI * 2;
-      while (delta < -Math.PI) delta += Math.PI * 2;
-      this.shipYaw += delta * Math.min(1, dt * 1.6);
-    }
-    this.ship.rotation.y = this.shipYaw;
-    this.prevShipPos.set(shipX, 0, shipZ);
+    // leichte Kurskorrekturen, aber nie eine Wende
+    this.ship.rotation.y = Math.sin(t * 0.06) * 0.14 + Math.sin(t * 0.17) * 0.05;
 
     // Minen driften vorbei, tanzen auf den Wellen und weichen dem Schiff aus
     for (const mine of this.mines) {
