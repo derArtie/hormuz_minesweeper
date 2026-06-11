@@ -1,5 +1,18 @@
 [
   {
+    "version": "2.1.0",
+    "date": "Juni 2026",
+    "items": [
+      "Neue Landing Page: cineastische 3D-Sturmszene mit patrouillierendem Schiff, ausweichenden Seeminen und Gischt",
+      "Realistischeres Wasser: echtes Sonnen-/Mondglitzern aus Mikro-Wellen (blickabhängig) statt wandernder Lichtflecken; Windflecken wechseln ruhige und glitzernde Zonen ab",
+      "Kartenumgebung an die echte Geografie angelehnt: Zagros-Gebirge im Norden, Dünen im Süden, Hadschar-Gebirge im Südosten, offene See an den Fahrwasser-Ausgängen — keine flachen Plateaus und Steilwände mehr am Kartenrand",
+      "Leuchtbojen neu verteilt: Tonnenketten markieren jetzt die Zufahrten des Fahrwassers (aus den Kartendaten abgeleitet, immer auf Wasser, nie auf Land)",
+      "Mobile Hochformat: sanfter Kamera-Einflug auf die Straße von Hormuz beim ersten Start statt winziger Totale",
+      "Mobile Querformat: kompakte Navigation in einer Zeile, HUD unten — nichts überdeckt sich mehr",
+      "Neustart über Smiley oder R behält die aktuelle Kameraansicht; nur ein Seiten-Reload setzt die Kamera zurück"
+    ]
+  },
+  {
     "version": "2.0.0",
     "date": "Juni 2026",
     "items": [
