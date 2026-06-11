@@ -46,6 +46,73 @@ function cellHeight(r: number, c: number, dist: number[][]): number {
   return base + jitter(cc, rr) * 0.3;
 }
 
+function clampi(v: number, lo: number, hi: number): number {
+  return v < lo ? lo : v > hi ? hi : v;
+}
+
+function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
+}
+
+/** Bilinear interpoliertes Value-Noise auf jitter() — sanfte Hügel statt Rauschen. */
+function vnoise(x: number, z: number): number {
+  const xi = Math.floor(x);
+  const zi = Math.floor(z);
+  const xf = x - xi;
+  const zf = z - zi;
+  const u = xf * xf * (3 - 2 * xf);
+  const v = zf * zf * (3 - 2 * zf);
+  return lerp(
+    lerp(jitter(xi, zi), jitter(xi + 1, zi), u),
+    lerp(jitter(xi, zi + 1), jitter(xi + 1, zi + 1), u),
+    v,
+  );
+}
+
+/** Zwei Oktaven gestapelt: große Bergzüge + feinere Struktur. */
+function fbm(x: number, z: number): number {
+  return vnoise(x * 0.16, z * 0.16) * 0.6 + vnoise(x * 0.42, z * 0.42) * 0.4;
+}
+
+/**
+ * Höhe auch außerhalb der Karte. Statt die Randzelle endlos zu klonen (ergab
+ * Plateaus mit Steilwänden und einen 1 Zelle breiten Wasser-„Kanal" in der
+ * NO-Ecke) wird die Küste mit wachsendem Abstand verschmiert und in eine an
+ * die echte Geografie angelehnte Umgebung übergeblendet: Zagros-Gebirge im
+ * Norden (Iran), Dünen im Süden, Hadschar-Gebirge im Südosten (Oman),
+ * offene See, wo die Karte mit Wasser endet.
+ */
+function extendedHeight(r: number, c: number, dist: number[][]): number {
+  if (r >= 0 && r < ROWS && c >= 0 && c < COLS) return cellHeight(r, c, dist);
+  const rr = clampi(r, 0, ROWS - 1);
+  const cc = clampi(c, 0, COLS - 1);
+  const out = Math.max(Math.abs(r - rr), Math.abs(c - cc));
+
+  // Küstenlinie verschmieren: Mittel über eine mit dem Abstand wachsende
+  // Nachbarschaft — schmale Wasserstreifen/Landzungen laufen nicht endlos weiter
+  const s = Math.min(out, 9);
+  let blurred = 0;
+  for (const dr of [-s, 0, s])
+    for (const dc of [-s, 0, s])
+      blurred += cellHeight(clampi(rr + dr, 0, ROWS - 1), clampi(cc + dc, 0, COLS - 1), dist);
+  blurred /= 9;
+  let h = lerp(cellHeight(rr, cc, dist), blurred, Math.min(out / 4, 1));
+
+  // Regionales Zielrelief, kontinuierlich über „Landigkeit" der Küste gemischt
+  const n = fbm(c, r);
+  const northT = r < 0 ? Math.min(-r / 9, 1) : 0;
+  const southT = r >= ROWS ? Math.min((r - ROWS + 1) / 9, 1) : 0;
+  const eastK = clampi((c - COLS * 0.55) / (COLS * 0.45), 0, 1);
+  const zagros = northT * (1.4 + n * 2.8);
+  const hajar = southT * eastK * (0.7 + n * 1.6);
+  const landTarget = 0.45 + n * 0.55 + zagros + hajar;
+  let ls = clampi((blurred + 0.35) / 0.5, 0, 1);
+  ls = ls * ls * (3 - 2 * ls);
+  const target = lerp(-0.7, landTarget, ls);
+
+  return lerp(h, target, Math.min(out / 10, 1));
+}
+
 const SAND = new THREE.Color('#d8b888');
 const DUNE = new THREE.Color('#c8a368');
 const ROCK = new THREE.Color('#9d7f56');
@@ -80,10 +147,10 @@ export function createTerrain(): THREE.Mesh {
     const c = Math.round(gx);
     const r = Math.round(gz);
     const h =
-      (cellHeight(r - 1, c - 1, dist) +
-        cellHeight(r - 1, c, dist) +
-        cellHeight(r, c - 1, dist) +
-        cellHeight(r, c, dist)) /
+      (extendedHeight(r - 1, c - 1, dist) +
+        extendedHeight(r - 1, c, dist) +
+        extendedHeight(r, c - 1, dist) +
+        extendedHeight(r, c, dist)) /
       4;
     pos.setY(i, h);
     color.copy(heightColor(h));
