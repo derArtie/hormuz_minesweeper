@@ -1,5 +1,31 @@
 [
   {
+    "version": "2.1.0",
+    "date": "Juni 2026",
+    "items": [
+      "Neue Landing Page: cineastische 3D-Sturmszene mit patrouillierendem Schiff, ausweichenden Seeminen und Gischt",
+      "Realistischeres Wasser: echtes Sonnen-/Mondglitzern aus Mikro-Wellen (blickabhängig) statt wandernder Lichtflecken; Windflecken wechseln ruhige und glitzernde Zonen ab",
+      "Kartenumgebung an die echte Geografie angelehnt: Zagros-Gebirge im Norden, Dünen im Süden, Hadschar-Gebirge im Südosten, offene See an den Fahrwasser-Ausgängen — keine flachen Plateaus und Steilwände mehr am Kartenrand",
+      "Leuchtbojen neu verteilt: Tonnenketten markieren jetzt die Zufahrten des Fahrwassers (aus den Kartendaten abgeleitet, immer auf Wasser, nie auf Land)",
+      "Mobile Hochformat: sanfter Kamera-Einflug auf die Straße von Hormuz beim ersten Start statt winziger Totale",
+      "Mobile Querformat: kompakte Navigation in einer Zeile, HUD unten — nichts überdeckt sich mehr",
+      "Neustart über Smiley oder R behält die aktuelle Kameraansicht; nur ein Seiten-Reload setzt die Kamera zurück"
+    ]
+  },
+  {
+    "version": "2.0.0",
+    "date": "Juni 2026",
+    "items": [
+      "Komplettes 3D-Remake mit Three.js: animiertes Wasser mit Wellen-Shader, Low-Poly-Terrain mit Höhenrelief, geneigte Top-Down-Kamera mit weichem Damping",
+      "Zellen versinken beim Aufdecken mit Wasserspritzern; Minen als 3D-Seeminen, Explosionen mit Partikeln, Lichtblitz und dezentem Kamera-Shake",
+      "Patrouille: sichtbares 3D-Schiff mit Schaukeln, Kielwasser und Navigationslicht; goldene, pulsierende Zielzone",
+      "Echter Tag/Nacht-Wechsel: Sonnen-/Mondlicht, Farbtemperatur, nachts Leuchtbojen entlang der Straße von Hormuz",
+      "Neues Glassmorphism-HUD und animierte End-Overlays mit Bestzeiten-Vergleich; Hilfe-Overlay per ?-Taste statt Dauer-Panel",
+      "Technik: Vite + TypeScript (strict), Spiellogik als getestete Engine (Vitest), InstancedMesh-Rendering, prefers-reduced-motion, ARIA-Live-Ansagen",
+      "Bestzeiten aus Version 1 werden automatisch übernommen (jetzt getrennt nach Modus)"
+    ]
+  },
+  {
     "version": "1.1.3",
     "date": "März 2026",
     "items": [

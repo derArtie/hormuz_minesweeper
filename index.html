@@ -1,394 +1,164 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hormuz Strategic — Maritimes Minesweeper im Persischen Golf</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Hormuz Strategic — Maritimes 3D-Minesweeper im Persischen Golf</title>
 
   <!-- SEO -->
-  <meta name="description" content="Hormuz Strategic: Browser-basiertes Minesweeper auf der Karte des Persischen Golfs. Räume Seeminen auf oder navigiere im Patrouille-Modus durch die Straße von Hormuz — in drei Schwierigkeitsgraden.">
-  <meta name="keywords" content="Minesweeper, Browser-Spiel, Persischer Golf, Straße von Hormuz, Seeminen, Strategie, Patrouille, kostenloses Spiel">
+  <meta name="description" content="Hormuz Strategic: 3D-Minesweeper auf der Karte des Persischen Golfs. Räume Seeminen auf oder navigiere im Patrouille-Modus durch die Straße von Hormuz — in drei Schwierigkeitsgraden.">
+  <meta name="keywords" content="Minesweeper, 3D, Browser-Spiel, Persischer Golf, Straße von Hormuz, Seeminen, Strategie, Patrouille, kostenloses Spiel">
   <meta name="author" content="Hormuz Strategic">
   <meta name="robots" content="index, follow">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#060d16">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Hormuz Strategic — Maritimes Minesweeper">
+  <meta property="og:title" content="Hormuz Strategic — Maritimes 3D-Minesweeper">
   <meta property="og:description" content="Räume Seeminen auf oder patrouilliere durch die Straße von Hormuz. Zwei Spielmodi, drei Schwierigkeitsgrade — kostenlos im Browser.">
   <meta property="og:locale" content="de_DE">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Hormuz Strategic — Maritimes Minesweeper">
+  <meta name="twitter:title" content="Hormuz Strategic — Maritimes 3D-Minesweeper">
   <meta name="twitter:description" content="Räume Seeminen auf oder patrouilliere durch die Straße von Hormuz. Zwei Spielmodi, drei Schwierigkeitsgrade — kostenlos im Browser.">
 
-  <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-
-  <link rel="stylesheet" href="minesweeper/fonts.css">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:       #0f172a;
-      --surface:  #1e293b;
-      --surface2: #263548;
-      --border:   #334155;
-      --accent:   #3b82f6;
-      --accent-dim: #1d4ed8;
-      --text:     #cbd5e1;
-      --muted:    #64748b;
-      --easy:     #4ade80;
-      --medium:   #fbbf24;
-      --hard:     #f87171;
-    }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px 16px 60px;
-    }
-
-    .page { max-width: 680px; width: 100%; }
-
-    /* ── Header ── */
-    .hero {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 32px;
-    }
-
-    .hero-icon {
-      width: 52px; height: 52px;
-      background: var(--accent);
-      border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      color: #fff;
-    }
-
-    .hero-title {
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #f1f5f9;
-    }
-
-    .hero-sub {
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-
-    /* ── Play button ── */
-    .play-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      background: var(--accent);
-      color: #fff;
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      padding: 14px 32px;
-      border-radius: 10px;
-      text-decoration: none;
-      margin-bottom: 36px;
-      transition: background 0.15s, transform 0.1s;
-      width: 100%;
-    }
-
-    .play-btn:hover  { background: #2563eb; }
-    .play-btn:active { transform: scale(0.98); }
-
-    /* ── Cards ── */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px 24px;
-      margin-bottom: 16px;
-    }
-
-    .card-title {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 14px;
-    }
-
-    p {
-      font-size: 13px;
-      line-height: 1.7;
-      color: #94a3b8;
-    }
-
-    /* ── Controls grid ── */
-    .controls-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0 24px;
-    }
-
-    .ctrl-group-label {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 10px;
-    }
-
-    .ctrl-list { list-style: none; }
-
-    .ctrl-list li {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
-      padding: 5px 0;
-      border-bottom: 1px solid #1e2d3d;
-      gap: 8px;
-    }
-
-    .ctrl-list li:last-child { border-bottom: none; }
-
-    .ctrl-list .action { color: #94a3b8; }
-
-    .ctrl-list .key {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      padding: 2px 7px;
-      color: #cbd5e1;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    /* ── Difficulty ── */
-    .diff-row {
-      display: flex;
-      gap: 12px;
-    }
-
-    .diff-card {
-      flex: 1;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px 16px;
-      text-align: center;
-    }
-
-    .diff-name {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-
-    .diff-name.easy   { color: var(--easy); }
-    .diff-name.medium { color: var(--medium); }
-    .diff-name.hard   { color: var(--hard); }
-
-    .diff-mines {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 22px;
-      font-weight: 500;
-      color: #f1f5f9;
-    }
-
-    .diff-label {
-      font-size: 10px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-
-    /* ── Features ── */
-    .feature-list { list-style: none; }
-
-    .feature-list li {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 13px;
-      color: #94a3b8;
-      padding: 6px 0;
-      border-bottom: 1px solid #1e2d3d;
-      line-height: 1.5;
-    }
-
-    .feature-list li:last-child { border-bottom: none; }
-
-    .feature-list .feat-icon {
-      font-size: 14px;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    /* ── Footer ── */
-    .page-footer {
-      margin-top: 32px;
-      text-align: center;
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    /* ── Responsive ── */
-    @media (max-width: 480px) {
-      .controls-grid { grid-template-columns: 1fr; gap: 16px; }
-      .diff-row { gap: 8px; }
-      .diff-card { padding: 12px 10px; }
-      .diff-mines { font-size: 18px; }
-    }
-  </style>
+  <link rel="stylesheet" href="fonts.css">
 </head>
 
 <body>
-  <div class="page">
 
-    <div class="hero">
-      <div class="hero-icon">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="5" r="3"/>
-          <line x1="12" y1="22" x2="12" y2="8"/>
-          <path d="M5 12H2a10 10 0 0 0 20 0h-3"/>
-        </svg>
-      </div>
-      <div>
-        <div class="hero-title">Hormuz Strategic</div>
-        <div class="hero-sub">Maritime Navigation Protocol</div>
-      </div>
-    </div>
+  <!-- 3D-Sturmszene (fixed im Hintergrund, Inhalt scrollt darüber) -->
+  <div id="hero-bg" aria-hidden="true"></div>
+  <div id="hero-vignette" aria-hidden="true"></div>
 
-    <a class="play-btn" href="minesweeper/">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+  <!-- Hero -->
+  <header id="hero">
+    <div class="hero-badge"><span class="dot"></span> Maritime Navigation Protocol</div>
+    <h1 class="hero-title">HORMUZ<br>STRATEGIC</h1>
+    <p class="hero-sub">
+      Maritimes 3D-Minesweeper im Persischen Golf. Räume Seeminen aus der Straße von
+      Hormuz — oder steuere dein Patrouillenschiff bei Nacht durch das Minenfeld.
+    </p>
+    <a class="cta" href="minesweeper/">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
       Mission starten
     </a>
+    <div class="hero-meta">2 Spielmodi · 3 Schwierigkeitsgrade · kostenlos im Browser</div>
+    <div class="scroll-hint" aria-hidden="true">⌄</div>
+  </header>
+
+  <main class="page">
 
     <!-- Spielprinzip -->
-    <div class="card">
-      <div class="card-title">Spielprinzip</div>
+    <section class="card reveal">
+      <h2 class="card-title">Spielprinzip</h2>
       <p>
-        Ein browser-basiertes Minesweeper auf einer stilisierten Karte des Persischen Golfs.
-        Wähle zwischen zwei Spielmodi: Im <strong style="color:#f1f5f9">Klassisch</strong>-Modus deckst du alle sicheren Wasserzellen auf,
-        ohne eine Seeminne zu treffen — der erste Klick ist immer sicher.
-        Im <strong style="color:#f1f5f9">Patrouille</strong>-Modus navigierst du dein Schiff von einer Seite der Karte zur anderen
+        Ein browser-basiertes 3D-Minesweeper (Three.js) auf einer stilisierten Karte des Persischen Golfs.
+        Wähle zwischen zwei Spielmodi: Im <strong>Klassisch</strong>-Modus deckst du alle sicheren Wasserzellen auf,
+        ohne eine Seemine zu treffen — der erste Klick ist immer sicher.
+        Im <strong>Patrouille</strong>-Modus navigierst du dein Schiff von einer Seite der Karte zur anderen
         und weichst dabei Minen aus.
       </p>
-    </div>
+    </section>
 
-    <!-- Steuerung -->
-    <div class="card">
-      <div class="card-title">Steuerung — Klassisch</div>
+    <!-- Steuerung Klassisch -->
+    <section class="card reveal">
+      <h2 class="card-title">Steuerung — Klassisch</h2>
       <div class="controls-grid">
         <div>
           <div class="ctrl-group-label">Desktop / Tastatur</div>
           <ul class="ctrl-list">
-            <li><span class="action">Zelle aufdecken</span><span class="key">Linksklick / Enter</span></li>
-            <li><span class="action">Flagge setzen</span><span class="key">Rechtsklick / Leertaste</span></li>
-            <li><span class="action">Fokus bewegen</span><span class="key">Pfeiltasten</span></li>
-            <li><span class="action">Chord-Reveal</span><span class="key">Klick auf Zahl</span></li>
-            <li><span class="action">Zoom</span><span class="key">Scroll</span></li>
+            <li><span>Zelle aufdecken</span><span class="key">Linksklick / Enter</span></li>
+            <li><span>Flagge setzen</span><span class="key">Rechtsklick / Leertaste</span></li>
+            <li><span>Fokus bewegen</span><span class="key">Pfeiltasten</span></li>
+            <li><span>Chord-Reveal</span><span class="key">Klick auf Zahl</span></li>
+            <li><span>Zoom</span><span class="key">Scroll</span></li>
           </ul>
         </div>
         <div>
           <div class="ctrl-group-label">Mobile</div>
           <ul class="ctrl-list">
-            <li><span class="action">Zelle aufdecken</span><span class="key">Tap</span></li>
-            <li><span class="action">Flagge setzen</span><span class="key">Long Press</span></li>
-            <li><span class="action">Zoom</span><span class="key">Pinch</span></li>
-            <li><span class="action">Karte verschieben</span><span class="key">Drag</span></li>
+            <li><span>Zelle aufdecken</span><span class="key">Tap</span></li>
+            <li><span>Flagge setzen</span><span class="key">Long Press</span></li>
+            <li><span>Zoom</span><span class="key">Pinch</span></li>
+            <li><span>Karte verschieben</span><span class="key">Drag</span></li>
           </ul>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Steuerung Patrouille -->
-    <div class="card">
-      <div class="card-title">Steuerung — Patrouille</div>
+    <section class="card reveal">
+      <h2 class="card-title">Steuerung — Patrouille</h2>
       <div class="controls-grid">
         <div>
           <div class="ctrl-group-label">Desktop</div>
           <ul class="ctrl-list">
-            <li><span class="action">Schiff bewegen</span><span class="key">W A S D / Pfeiltasten</span></li>
-            <li><span class="action">Flagge setzen</span><span class="key">Rechtsklick</span></li>
-            <li><span class="action">Zoom</span><span class="key">Scroll</span></li>
+            <li><span>Schiff bewegen</span><span class="key">W A S D / Pfeiltasten</span></li>
+            <li><span>Flagge setzen</span><span class="key">Rechtsklick</span></li>
+            <li><span>Zoom</span><span class="key">Scroll</span></li>
           </ul>
         </div>
         <div>
           <div class="ctrl-group-label">Mobile</div>
           <ul class="ctrl-list">
-            <li><span class="action">Schiff bewegen</span><span class="key">D-Pad (unten links)</span></li>
-            <li><span class="action">Zoom</span><span class="key">Pinch</span></li>
-            <li><span class="action">Karte verschieben</span><span class="key">Drag</span></li>
+            <li><span>Schiff bewegen</span><span class="key">D-Pad (unten links)</span></li>
+            <li><span>Zoom</span><span class="key">Pinch</span></li>
+            <li><span>Karte verschieben</span><span class="key">Drag</span></li>
           </ul>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Schwierigkeitsgrade -->
-    <div class="card">
-      <div class="card-title">Schwierigkeitsgrade</div>
+    <section class="card reveal">
+      <h2 class="card-title">Schwierigkeitsgrade</h2>
       <div class="diff-row">
-        <div class="diff-card">
-          <div class="diff-name easy">Leicht</div>
-          <div class="diff-mines">45</div>
-          <div class="diff-label">Seeminen</div>
+        <div class="diff-card easy">
+          <div class="diff-name">Leicht</div>
+          <div class="diff-mines" data-count="45">0</div>
+          <div class="diff-label">Seeminen · 3 Leben</div>
         </div>
-        <div class="diff-card">
-          <div class="diff-name medium">Mittel</div>
-          <div class="diff-mines">99</div>
-          <div class="diff-label">Seeminen</div>
+        <div class="diff-card medium">
+          <div class="diff-name">Mittel</div>
+          <div class="diff-mines" data-count="99">0</div>
+          <div class="diff-label">Seeminen · 5 Leben</div>
         </div>
-        <div class="diff-card">
-          <div class="diff-name hard">Schwer</div>
-          <div class="diff-mines">150</div>
-          <div class="diff-label">Seeminen</div>
+        <div class="diff-card hard">
+          <div class="diff-name">Schwer</div>
+          <div class="diff-mines" data-count="150">0</div>
+          <div class="diff-label">Seeminen · 7 Leben</div>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Features -->
-    <div class="card">
-      <div class="card-title">Features</div>
+    <section class="card reveal">
+      <h2 class="card-title">Features</h2>
       <ul class="feature-list">
+        <li><span class="feat-icon">🧊</span><span>Echtes 3D mit Three.js: animiertes Wasser mit Wellen-Shader, Low-Poly-Terrain mit Höhenrelief, geneigte Top-Down-Kamera</span></li>
         <li><span class="feat-icon">🗺️</span><span>Kartenansicht mit Länderbeschriftungen — Persischer Golf, Straße von Hormuz, Golf von Oman</span></li>
-        <li><span class="feat-icon">🚢</span><span>Patrouille-Modus: Navigiere dein Schiff von einer Seite zur anderen — mit 1–3 Leben je Schwierigkeit und Slide-Animation</span></li>
-        <li><span class="feat-icon">⌨️</span><span>Tastatursteuerung im Klassisch-Modus: Pfeiltasten zum Navigieren, Enter zum Aufdecken, Leertaste für Flaggen</span></li>
+        <li><span class="feat-icon">🚢</span><span>Patrouille-Modus: sichtbares 3D-Schiff mit Schaukeln und Kielwasser — 3 bis 7 Leben je Schwierigkeit</span></li>
+        <li><span class="feat-icon">💥</span><span>Zellen versinken mit Wasserspritzern, Explosionen mit Partikeln, Lichtblitz und Kamera-Shake</span></li>
+        <li><span class="feat-icon">⌨️</span><span>Vollständige Tastatursteuerung: Pfeiltasten, Enter, Leertaste — plus ARIA-Ansagen für Screenreader</span></li>
         <li><span class="feat-icon">🔊</span><span>Sound-Effekte via Web Audio API: Klick beim Aufdecken, Explosion bei Mine, Fanfare beim Sieg — per Button stummschaltbar</span></li>
         <li><span class="feat-icon">🎉</span><span>Konfetti-Animation beim Sieg und Schwierigkeitsauswahl direkt im Spielende-Overlay</span></li>
-        <li><span class="feat-icon">🌊</span><span>Animiertes Wasser mit Wellenbewegung und Partikeleffekte bei Explosionen</span></li>
-        <li><span class="feat-icon">🔍</span><span>Pan &amp; Zoom — auf Desktop per Scroll, auf Mobile per Pinch &amp; Drag</span></li>
-        <li><span class="feat-icon">🌙</span><span>Tag/Nacht-Modus umschaltbar</span></li>
-        <li><span class="feat-icon">🏆</span><span>Persistente Bestzeiten pro Schwierigkeitsgrad (Top 5) — bleiben nach Reload erhalten</span></li>
+        <li><span class="feat-icon">🔍</span><span>Pan &amp; Zoom mit weichem Damping — auf Desktop per Scroll, auf Mobile per Pinch &amp; Drag</span></li>
+        <li><span class="feat-icon">🌙</span><span>Tag/Nacht-Modus mit echtem Lichtwechsel — nachts Mondlicht und Leuchtbojen</span></li>
+        <li><span class="feat-icon">🏆</span><span>Persistente Bestzeiten pro Modus und Schwierigkeitsgrad (Top 5) — Zeiten aus v1 werden übernommen</span></li>
         <li><span class="feat-icon">😹</span><span>Katzen-Memes beim Gewinnen und Verlieren mit zufälligen Sprüchen</span></li>
         <li><span class="feat-icon">📱</span><span>Vollständig mobiloptimiert — kein Download, läuft direkt im Browser</span></li>
       </ul>
-    </div>
+    </section>
 
-    <div class="page-footer">© 2026 DerArtie. Hormuz Strategic.</div>
+    <footer class="page-footer">© 2026 DerArtie. Hormuz Strategic.</footer>
 
-  </div>
+  </main>
+
+  <script type="module" src="/src/landing/main.ts"></script>
 </body>
 
 </html>
