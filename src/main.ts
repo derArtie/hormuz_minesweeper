@@ -80,6 +80,8 @@ function boot(): void {
   }
 
   const scene = new SceneRenderer(app, settings.day);
+  // Dev-Konsole: Szene inspizierbar machen (landet nicht im Prod-Build)
+  if (import.meta.env.DEV) (window as unknown as { __scene: SceneRenderer }).__scene = scene;
 
   const hud = new Hud(app, {
     onMode: (m) => {
@@ -195,6 +197,7 @@ function boot(): void {
     scene.board.reset(game);
     scene.board.setFocus(null);
     scene.confetti.clear();
+    scene.seaLife.reset();
     // Restart (Smiley/R) behält die aktuelle Ansicht — nur der allererste
     // Start (bzw. Seiten-Reload) setzt die Kamera und fliegt ggf. ein.
     scene.rig.follow(null);
@@ -222,6 +225,7 @@ function boot(): void {
 
     game.on('revealed', (cells) => {
       scene.board.revealCells(cells, game.board.count, true);
+      scene.seaLife.addOpen(cells);
       if (cells.length > 0)
         announce(cells.length === 1 ? 'Sektor aufgedeckt' : `${cells.length} Sektoren aufgedeckt`);
     });
