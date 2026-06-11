@@ -15,6 +15,8 @@ import { Overlays } from './ui/overlays';
 
 const LOSS_OVERLAY_DELAY_MS = 1100;
 const PATROL_INTRO_ZOOM = 2.6;
+/** Zentrum der Straße von Hormuz — Ziel des Mobile-Intro-Flugs. */
+const STRAIT_CENTER = { r: 20, c: 33 };
 
 interface MemeData {
   captions: { won: string[]; lost: string[] };
@@ -240,6 +242,13 @@ function boot(): void {
       scene.rig.follow(game.ship);
       announce('Patrouille gestartet. Navigiere das Schiff durch das Minenfeld zur anderen Seite.');
     } else {
+      // Hochformat (Mobile): in der Totalen ist die Karte winzig — sanft auf
+      // die Straße von Hormuz einfliegen; von dort aus lässt sich pannen.
+      const aspect = window.innerWidth / Math.max(1, window.innerHeight);
+      if (aspect < 0.9) {
+        const introZoom = Math.min(2.6, 1.3 / aspect);
+        scene.rig.flyTo(STRAIT_CENTER, introZoom, reducedMotion ? 0.01 : 1.6);
+      }
       announce(`Klassische Mission gestartet, ${DIFFICULTIES[diff].label}: ${game.mineTotal} Minen.`);
     }
 

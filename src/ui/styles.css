@@ -742,6 +742,71 @@ html.day .smiley {
   }
 }
 
+/* ── Niedrige Viewports (Landscape-Handys) ─────────────────────────────
+   Die Nav darf nicht zweizeilig über dem HUD liegen: alles kompakter,
+   HUD wandert nach unten (wie im Hochformat). */
+@media (max-height: 520px) {
+  .nav {
+    top: var(--sp-2);
+    gap: var(--sp-3);
+    padding: var(--sp-1) var(--sp-3);
+  }
+
+  .brand-sub {
+    display: none;
+  }
+
+  .brand-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .brand-title {
+    font-size: var(--fs-sm);
+  }
+
+  .seg-btn {
+    padding: 4px 10px;
+    min-height: 30px;
+  }
+
+  .icon-btn {
+    width: 30px;
+    height: 30px;
+    font-size: var(--fs-sm);
+  }
+
+  .hud-bar {
+    top: auto;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    gap: var(--sp-3);
+    padding: var(--sp-1) var(--sp-3);
+  }
+
+  .lcd {
+    font-size: 15px;
+  }
+
+  .smiley {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  .dpad {
+    bottom: calc(70px + env(safe-area-inset-bottom));
+  }
+
+  .dpad-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .hint-toast {
+    bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     transition-duration: 0.01ms !important;
