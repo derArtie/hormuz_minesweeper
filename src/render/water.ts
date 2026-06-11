@@ -47,22 +47,24 @@ const FRAGMENT = /* glsl */ `
   varying float vWave;
   #include <fog_pars_fragment>
 
-  float hash(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-  }
-
   void main() {
     vec3 n = normalize(vNormalW);
     vec3 sun = normalize(uSunDir);
     float diff = max(dot(n, sun), 0.0);
-    vec3 col = mix(uDeep, uShallow, smoothstep(-0.1, 0.11, vWave));
+    float crestK = vWave / 0.115; // normalisierte Wellenhöhe (-1 … 1)
+    vec3 col = mix(uDeep, uShallow, smoothstep(-0.85, 0.95, crestK));
     col *= 0.78 + 0.4 * diff;
 
-    // Stilisiertes Glitzern: spiegelnder Sonnenanteil + funkelnde Zellen
+    // Stilisiertes Glitzern — alles kontinuierlich, nichts springt:
+    // spiegelnder Sonnenanteil + weich wandernde Glanzlichter + Schaum auf Kämmen
     vec3 refl = reflect(-sun, n);
     float spec = pow(max(refl.y, 0.0), 48.0);
-    float twinkle = step(0.993, hash(floor(vWorldPos.xz * 5.0) + floor(uTime * 2.5)));
-    col += uSparkle * (spec * 0.55 + twinkle * 0.7 * diff) * uSparkleStrength;
+    vec2 p = vWorldPos.xz;
+    float shimmer =
+      pow(max(0.0, sin(p.x * 2.9 + uTime * 1.6) * sin(p.y * 2.3 - uTime * 1.1)), 12.0) * 0.3 +
+      pow(max(0.0, sin((p.x + p.y) * 1.7 - uTime * 1.3) * sin(p.y * 3.1 + uTime * 0.9)), 16.0) * 0.22;
+    float crest = smoothstep(0.55, 1.0, crestK) * 0.22;
+    col += uSparkle * (spec * 0.55 + shimmer * diff + crest) * uSparkleStrength;
 
     gl_FragColor = vec4(col, 1.0);
     #include <fog_fragment>
