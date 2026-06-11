@@ -5,7 +5,7 @@ export const COLS = MAP_COLS;
 export const ROWS = MAP_ROWS;
 
 function parse(rows: readonly string[]): boolean[][] {
-  return rows.map((row) => [...row].map((ch) => ch === '1'));
+  return rows.map((row) => Array.from(row, (ch) => ch === '1'));
 }
 
 /** true = Landmasse */

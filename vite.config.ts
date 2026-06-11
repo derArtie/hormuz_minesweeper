@@ -12,6 +12,9 @@ export default defineConfig({
         landing: resolve(__dirname, 'index.html'),
         game: resolve(__dirname, 'minesweeper/index.html'),
       },
+      output: {
+        manualChunks: { three: ['three'] },
+      },
     },
   },
   test: {
