@@ -60,6 +60,7 @@ function boot(): void {
   let focusCell: Cell | null = null;
   let keyboardActive = false;
   let lossOverlayTimer = 0;
+  let firstGame = true;
 
   let memes: MemeData | null = null;
   const lastMeme = { won: { value: null as string | null }, lost: { value: null as string | null } };
@@ -194,7 +195,20 @@ function boot(): void {
     scene.board.reset(game);
     scene.board.setFocus(null);
     scene.confetti.clear();
-    scene.rig.resetView();
+    // Restart (Smiley/R) behält die aktuelle Ansicht — nur der allererste
+    // Start (bzw. Seiten-Reload) setzt die Kamera und fliegt ggf. ein.
+    scene.rig.follow(null);
+    if (firstGame) {
+      firstGame = false;
+      scene.rig.resetView();
+      // Hochformat (Mobile): in der Totalen ist die Karte winzig — sanft auf
+      // die Straße von Hormuz einfliegen; von dort aus lässt sich pannen.
+      const aspect = window.innerWidth / Math.max(1, window.innerHeight);
+      if (mode !== 'patrol' && aspect < 0.9) {
+        const introZoom = Math.min(2.6, 1.3 / aspect);
+        scene.rig.flyTo(STRAIT_CENTER, introZoom, reducedMotion ? 0.01 : 1.6);
+      }
+    }
     scene.ship.setVisible(mode === 'patrol');
 
     hud.setMode(mode);
@@ -242,13 +256,6 @@ function boot(): void {
       scene.rig.follow(game.ship);
       announce('Patrouille gestartet. Navigiere das Schiff durch das Minenfeld zur anderen Seite.');
     } else {
-      // Hochformat (Mobile): in der Totalen ist die Karte winzig — sanft auf
-      // die Straße von Hormuz einfliegen; von dort aus lässt sich pannen.
-      const aspect = window.innerWidth / Math.max(1, window.innerHeight);
-      if (aspect < 0.9) {
-        const introZoom = Math.min(2.6, 1.3 / aspect);
-        scene.rig.flyTo(STRAIT_CENTER, introZoom, reducedMotion ? 0.01 : 1.6);
-      }
       announce(`Klassische Mission gestartet, ${DIFFICULTIES[diff].label}: ${game.mineTotal} Minen.`);
     }
 

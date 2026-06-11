@@ -1,16 +1,34 @@
 import * as THREE from 'three';
+import { COLS, ROWS, isLand, isPlayable } from '../engine/map';
 import { DAY, NIGHT, type Mood } from './palette';
 import type { Water } from './water';
 
 const TRANSITION_SECONDS = 1.4;
 
-/** Positionen der Leuchtbojen (Weltkoordinaten, entlang der Straße von Hormuz). */
-const BUOY_POSITIONS: [number, number][] = [
-  [2, -2],
-  [7, 1],
-  [12, 4],
-  [-10, 4],
-];
+/**
+ * Leuchtbojen-Positionen aus der Karte ableiten: Ketten von Fahrwassertonnen
+ * vor den offenen Kanten, an denen das befahrbare Wasser die Karte verlässt —
+ * Westzufahrt (Persischer Golf), Ostzufahrt und Südost-Ausgang (Golf von
+ * Oman). Sie liegen knapp außerhalb des Spielfelds: garantiert auf Wasser,
+ * nie auf Land und nie unter einer Spielfeld-Kachel.
+ */
+function buoyPositions(): [number, number][] {
+  const west: number[] = [];
+  const east: number[] = [];
+  const south: number[] = [];
+  for (let r = 0; r < ROWS; r++) {
+    if (!isLand[r][0] && isPlayable[r][0]) west.push(r);
+    if (!isLand[r][COLS - 1] && isPlayable[r][COLS - 1]) east.push(r);
+  }
+  for (let c = 0; c < COLS; c++) if (!isLand[ROWS - 1][c] && isPlayable[ROWS - 1][c]) south.push(c);
+
+  const every = (arr: number[], n: number) => arr.filter((_, i) => i % n === Math.floor(n / 2));
+  const picked: [number, number][] = [];
+  for (const r of every(west, 3)) picked.push([-COLS / 2 - 1.5, r - ROWS / 2 + 0.5]);
+  for (const r of every(east, 3)) picked.push([COLS / 2 + 1.5, r - ROWS / 2 + 0.5]);
+  for (const c of every(south, 3)) picked.push([c - COLS / 2 + 0.5, ROWS / 2 + 1.5]);
+  return picked;
+}
 
 /**
  * Echter Licht-Wechsel: Sonne/Mond, Farbtemperatur, Nebel, Wasserfarben und
@@ -43,7 +61,11 @@ export class DayNight {
     const bulbGeo = new THREE.SphereGeometry(0.16, 8, 6);
     const baseGeo = new THREE.CylinderGeometry(0.1, 0.22, 0.5, 6);
     const baseMat = new THREE.MeshStandardMaterial({ color: '#b3402a', roughness: 0.8 });
-    for (const [x, z] of BUOY_POSITIONS) {
+    // Echte PointLights sind teuer (Forward-Rendering): nur jede zweite Boje
+    // bekommt eine, gedeckelt — alle leuchten aber über ihr Emissive-Material.
+    const positions = buoyPositions();
+    const maxLights = 8;
+    positions.forEach(([x, z], i) => {
       const bulbMat = new THREE.MeshStandardMaterial({
         color: '#ffd27a',
         emissive: new THREE.Color('#ffb347'),
@@ -53,12 +75,15 @@ export class DayNight {
       bulb.position.set(x, 0.62, z);
       const base = new THREE.Mesh(baseGeo, baseMat);
       base.position.set(x, 0.25, z);
-      const light = new THREE.PointLight('#ffb347', 0, 9, 2);
-      light.position.set(x, 0.9, z);
-      this.buoys.add(bulb, base, light);
-      this.buoyLights.push(light);
+      this.buoys.add(bulb, base);
       this.buoyBulbs.push(bulbMat);
-    }
+      if (i % 2 === 0 && this.buoyLights.length < maxLights) {
+        const light = new THREE.PointLight('#ffb347', 0, 9, 2);
+        light.position.set(x, 0.9, z);
+        this.buoys.add(light);
+        this.buoyLights.push(light);
+      }
+    });
     this.scene.add(this.buoys);
     this.applyMood();
   }
@@ -86,10 +111,8 @@ export class DayNight {
     const night = 1 - this.factor;
     if (night > 0.01) {
       const pulse = 0.65 + 0.35 * Math.sin(time * 2.2);
-      for (let i = 0; i < this.buoyLights.length; i++) {
-        this.buoyLights[i].intensity = NIGHT.buoyIntensity * night * pulse;
-        this.buoyBulbs[i].emissiveIntensity = 2.4 * night * pulse;
-      }
+      for (const light of this.buoyLights) light.intensity = NIGHT.buoyIntensity * night * pulse;
+      for (const bulb of this.buoyBulbs) bulb.emissiveIntensity = 2.4 * night * pulse;
     }
   }
 
