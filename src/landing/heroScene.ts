@@ -65,6 +65,11 @@ export class HeroScene {
   private flashT = 0;
   private scrollProgress = 0;
 
+  /** Seitliche Reichweite der Patrouillenroute — aspektabhängig, damit das Schiff im Bild bleibt. */
+  private shipRange = 3;
+  private shipYaw = 0;
+  private readonly prevShipPos = new THREE.Vector3();
+
   constructor(private readonly container: HTMLElement) {
     this.reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.amp = this.reduced ? CALM_AMP : STORM_AMP;
@@ -191,6 +196,9 @@ export class HeroScene {
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h);
+    // Sichtbare halbe Breite auf Höhe des Schiffs (Kamera z≈11, Schiff z≈2.5)
+    const halfWidth = Math.tan(THREE.MathUtils.degToRad(25)) * 8.4 * this.camera.aspect;
+    this.shipRange = THREE.MathUtils.clamp(halfWidth - 1.6, 2.2, 5.5);
   }
 
   update(dt: number): void {
@@ -198,22 +206,46 @@ export class HeroScene {
     const t = this.time;
     this.water.uniforms.uTime.value = t;
 
-    // Schiff: unten links im Bild (nicht hinterm Text), Slalom + auf den Wellen reiten
-    const shipX = -4.5 + Math.sin(t * 0.16) * 1.3;
-    const shipZ = 2.6 + Math.sin(t * 0.11) * 1.6;
+    // Schiff: patrouilliert zwischen linkem Bildrand und Bildmitte (mit Wende),
+    // weicht leicht in der Tiefe aus und reitet auf den Wellen
+    const r = this.shipRange;
+    const shipX = -r * 0.35 + r * 0.65 * Math.sin(t * 0.12);
+    const shipZ = 2.4 + Math.sin(t * 0.07) * 1.2;
     const e = 0.6;
     const h = waveHeight(shipX, shipZ, t, this.amp);
     const hx = (waveHeight(shipX + e, shipZ, t, this.amp) - waveHeight(shipX - e, shipZ, t, this.amp)) / (2 * e);
     const hz = (waveHeight(shipX, shipZ + e, t, this.amp) - waveHeight(shipX, shipZ - e, t, this.amp)) / (2 * e);
     this.ship.position.set(shipX, h + 0.05, shipZ);
-    this.ship.rotation.z = -Math.atan(hx) * 0.75 + Math.sin(t * 1.4) * 0.02;
-    this.ship.rotation.x = Math.atan(hz) * 0.75;
-    this.ship.rotation.y = Math.sin(t * 0.11) * 0.18; // Nase folgt dem Slalomkurs
+    this.ship.rotation.z = -Math.atan(hx) * 0.7 + Math.sin(t * 1.4) * 0.02;
+    this.ship.rotation.x = Math.atan(hz) * 0.7;
 
-    // Minen driften vorbei und tanzen auf den Wellen
+    // Bug zeigt in Fahrtrichtung; an den Wendepunkten dreht das Schiff langsam um
+    const vx = shipX - this.prevShipPos.x;
+    const vz = shipZ - this.prevShipPos.z;
+    if (dt > 0 && Math.hypot(vx, vz) / dt > 0.12) {
+      const target = Math.atan2(-vz, vx);
+      let delta = target - this.shipYaw;
+      while (delta > Math.PI) delta -= Math.PI * 2;
+      while (delta < -Math.PI) delta += Math.PI * 2;
+      this.shipYaw += delta * Math.min(1, dt * 1.6);
+    }
+    this.ship.rotation.y = this.shipYaw;
+    this.prevShipPos.set(shipX, 0, shipZ);
+
+    // Minen driften vorbei, tanzen auf den Wellen und weichen dem Schiff aus
     for (const mine of this.mines) {
       const p = mine.mesh.position;
       p.x -= MINE_SPEED * dt;
+      const dx = p.x - shipX;
+      const dz = p.z - shipZ;
+      const distSq = dx * dx + dz * dz;
+      if (distSq < 12.25) {
+        // sanfte Abstoßung im 3.5er-Radius: keine Mine treibt durchs Boot
+        const dist = Math.sqrt(distSq) || 0.001;
+        const push = ((3.5 - dist) * 2.2 * dt) / dist;
+        p.x += dx * push;
+        p.z += dz * push;
+      }
       p.y = waveHeight(p.x, p.z, t + mine.phase, this.amp) + 0.12;
       mine.mesh.rotation.y += mine.spin * dt;
       mine.mesh.rotation.x = Math.sin(t * 0.8 + mine.phase) * 0.18;
