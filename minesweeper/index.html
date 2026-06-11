@@ -1,176 +1,32 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Hormuz Strategic — Maritimes Minesweeper im Persischen Golf</title>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hormuz Strategic — Maritimes Minesweeper im Persischen Golf</title>
+    <meta
+      name="description"
+      content="Hormuz Strategic: 3D-Minesweeper auf der Karte des Persischen Golfs. Räume Seeminen auf oder navigiere im Patrouille-Modus durch die Straße von Hormuz — in drei Schwierigkeitsgraden."
+    />
+    <meta name="author" content="Hormuz Strategic" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#06121f" />
 
-  <!-- SEO -->
-  <meta name="description" content="Hormuz Strategic: Browser-basiertes Minesweeper auf der Karte des Persischen Golfs. Räume Seeminen auf oder navigiere im Patrouille-Modus durch die Straße von Hormuz — in drei Schwierigkeitsgraden.">
-  <meta name="keywords" content="Minesweeper, Browser-Spiel, Persischer Golf, Straße von Hormuz, Seeminen, Strategie, Patrouille, kostenloses Spiel">
-  <meta name="author" content="Hormuz Strategic">
-  <meta name="robots" content="index, follow">
-  <meta name="theme-color" content="#0f172a">
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Hormuz Strategic — Maritimes 3D-Minesweeper" />
+    <meta
+      property="og:description"
+      content="Räume Seeminen auf oder patrouilliere durch die Straße von Hormuz. Zwei Spielmodi, drei Schwierigkeitsgrade — kostenlos im Browser."
+    />
+    <meta property="og:locale" content="de_DE" />
 
-  <!-- Open Graph -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Hormuz Strategic — Maritimes Minesweeper">
-  <meta property="og:description" content="Räume Seeminen auf oder patrouilliere durch die Straße von Hormuz. Zwei Spielmodi, drei Schwierigkeitsgrade — kostenlos im Browser.">
-  <meta property="og:locale" content="de_DE">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/fonts.css" />
+  </head>
 
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Hormuz Strategic — Maritimes Minesweeper">
-  <meta name="twitter:description" content="Räume Seeminen auf oder patrouilliere durch die Straße von Hormuz. Zwei Spielmodi, drei Schwierigkeitsgrade — kostenlos im Browser.">
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-
-  <link rel="stylesheet" href="fonts.css">
-  <link rel="stylesheet" href="styles.css?v=1.1.3">
-</head>
-
-<body>
-
-  <div id="gw">
-
-    <!-- Navigation Header -->
-    <header id="nav">
-      <div id="brand">
-        <div id="brand-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="5" r="3"/>
-            <line x1="12" y1="22" x2="12" y2="8"/>
-            <path d="M5 12H2a10 10 0 0 0 20 0h-3"/>
-          </svg>
-        </div>
-        <div id="brand-text">
-          <div id="brand-title">Hormuz Strategic</div>
-          <div id="brand-sub">Maritime Navigation Protocol</div>
-        </div>
-      </div>
-
-      <div id="nav-center">
-        <nav id="mode-btns">
-          <button class="mbtn active" data-m="classic">⚓ Klassisch</button>
-          <button class="mbtn" data-m="patrol">🚢 Patrouille</button>
-        </nav>
-        <nav id="diff-btns">
-          <button class="dbtn active" data-d="easy">Easy</button>
-          <button class="dbtn" data-d="medium">Medium</button>
-          <button class="dbtn" data-d="hard">Hard</button>
-        </nav>
-      </div>
-
-      <div id="nav-actions">
-        <div id="cur-picker">
-          <button id="cur-btn" title="Cursor ändern">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 4l7.07 17 2.51-7.39L21 11.07z"/>
-            </svg>
-          </button>
-          <div id="cur-panel">
-            <button class="cur-opt active" data-cur="default">🖱️ Standard</button>
-            <button class="cur-opt" data-cur="crosshair">✖️ Fadenkreuz</button>
-            <button class="cur-opt" data-cur="ship">🚢 Schiff</button>
-          </div>
-        </div>
-        <button id="cl-btn" title="Changelog">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-        </button>
-        <button id="snd-btn" title="Sound an/aus">
-          <svg id="snd-icon-on" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-          </svg>
-          <svg id="snd-icon-off" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-            <line x1="23" y1="9" x2="17" y2="15"/>
-            <line x1="17" y1="9" x2="23" y2="15"/>
-          </svg>
-        </button>
-        <button id="dn-btn" title="Tag/Nacht umschalten">☀️</button>
-      </div>
-    </header>
-
-    <!-- Changelog Modal -->
-    <div id="cl-modal">
-      <div id="cl-box">
-        <div id="cl-header">
-          <span id="cl-title">Release Notes</span>
-          <button id="cl-close">✕</button>
-        </div>
-        <div id="cl-body"></div>
-      </div>
-    </div>
-
-    <!-- Control Bar -->
-    <div id="hdr">
-      <div class="counter-group">
-        <span class="counter-label" id="mc-label">Mines Detected</span>
-        <div class="lcd" id="mc">045</div>
-      </div>
-
-      <button id="sb" title="Neues Spiel">🧭</button>
-
-      <div class="counter-group">
-        <span class="counter-label">Mission Clock</span>
-        <div class="lcd" id="tm">000</div>
-      </div>
-    </div>
-
-    <!-- Canvas -->
-    <div id="cc">
-      <canvas id="gc"></canvas>
-      <div id="ov">
-        <div id="ot"></div>
-        <div id="meme-box">
-          <img id="meme-img" src="" alt="">
-          <video id="meme-vid" autoplay loop muted playsinline></video>
-          <div id="meme-cap"></div>
-        </div>
-        <div id="os">Klick zum Neustart</div>
-        <div id="os-diff">
-          <button class="os-dbtn" data-d="easy">Leicht</button>
-          <button class="os-dbtn" data-d="medium">Mittel</button>
-          <button class="os-dbtn" data-d="hard">Schwer</button>
-        </div>
-      </div>
-      <div id="dpad">
-        <button class="dp" data-dr="-1" data-dc="0" style="grid-area:u">▲</button>
-        <button class="dp" data-dr="0" data-dc="-1" style="grid-area:l">◀</button>
-        <div style="grid-area:m"></div>
-        <button class="dp" data-dr="0" data-dc="1" style="grid-area:r">▶</button>
-        <button class="dp" data-dr="1" data-dc="0" style="grid-area:d">▼</button>
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <footer id="ft">
-      <div id="hs-panel">
-        <div id="hs-title">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
-          </svg>
-          Personal Records
-        </div>
-        <div id="hs-list"></div>
-      </div>
-
-      <div id="st">
-        <div id="st-title">Protocol Instructions</div>
-        <div id="st-body"></div>
-        <span id="ver"></span>
-      </div>
-    </footer>
-
-  </div>
-
-  <script src="game.js?v=1.1.3"></script>
-</body>
-
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>
