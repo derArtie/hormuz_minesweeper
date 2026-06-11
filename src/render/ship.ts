@@ -6,7 +6,8 @@ import { badgeTexture } from './textures';
 const SLIDE_SECONDS = 0.16;
 const BADGE_POP_SECONDS = 0.28;
 
-function buildShipMesh(): THREE.Group {
+/** Low-Poly-Patrouillenschiff (Spitze zeigt +X) — auch für die Landing Page. */
+export function buildShipMesh(): THREE.Group {
   const ship = new THREE.Group();
   const hullMat = new THREE.MeshStandardMaterial({ color: '#5d728a', roughness: 0.6 });
   const deckMat = new THREE.MeshStandardMaterial({ color: '#8b9aab', roughness: 0.7 });
