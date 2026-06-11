@@ -16,10 +16,12 @@ export interface DifficultyConfig {
   readonly lives: number;
 }
 
+// Leben steigen mit der Minenzahl (wie v1): gleicht die höhere Dichte aus,
+// mit 1 Leben wäre Schwer (150 Minen) praktisch unschaffbar.
 export const DIFFICULTIES: Record<Difficulty, DifficultyConfig> = {
   easy: { mines: 45, label: 'Leicht', color: '#4ade80', lives: 3 },
-  medium: { mines: 99, label: 'Mittel', color: '#fbbf24', lives: 2 },
-  hard: { mines: 150, label: 'Schwer', color: '#f87171', lives: 1 },
+  medium: { mines: 99, label: 'Mittel', color: '#fbbf24', lives: 5 },
+  hard: { mines: 150, label: 'Schwer', color: '#f87171', lives: 7 },
 };
 
 export const DIFFICULTY_ORDER: readonly Difficulty[] = ['easy', 'medium', 'hard'];

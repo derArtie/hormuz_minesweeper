@@ -87,7 +87,8 @@ describe('Game (Patrouille)', () => {
   });
 
   it('Mine kostet ein Leben, Schiff bleibt stehen; 0 Leben = verloren', () => {
-    const game = new Game('patrol', 'hard', mulberry32(1)); // 1 Leben
+    const game = new Game('patrol', 'hard', mulberry32(1));
+    game.lives = 1; // letztes Leben erzwingen, damit der Treffer das Spiel beendet
     const ship = game.ship!;
     // benachbarte Mine suchen bzw. konstruieren
     const dirs: Cell[] = [

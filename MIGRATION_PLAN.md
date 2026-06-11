@@ -29,7 +29,9 @@ Stand: 2026-06-11 · Branch: `claude/hormuz-3d`
 ### Abweichungen Spec ↔ v1-Code
 
 - **Leben (Patrouille)**: Spec und README sagen 1–3 Leben; `game.js` hat 3/5/7.
-  → Umgesetzt wird die Spec: Leicht 3, Mittel 2, Schwer 1.
+  → Zunächst nach Spec umgesetzt (3/2/1), nach Spieler-Feedback wieder auf das
+  v1-Verhalten 3/5/7 zurückgestellt: Die Leben kompensieren die steigende
+  Minendichte, mit nur 1 Leben wäre Schwer (150 Minen) praktisch unschaffbar.
 - **Cursor-Auswahl** (Standard/Fadenkreuz/Schiff) und **Dev-Panel** stehen nicht auf der
   Paritätsliste → entfallen in 2.0 (Cursor-Emojis passen nicht zur 3D-Szene). Changelog-Modal bleibt.
 

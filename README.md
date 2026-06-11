@@ -15,16 +15,16 @@ immer sicher (3×3-Umfeld minenfrei). Klick auf eine erfüllte Zahl löst einen 
 
 ### 🚢 Patrouille
 Navigiere das Patrouillenschiff von einer Kartenseite zur anderen, ohne auf Minen zu laufen.
-Ein minenfreier Pfad ist garantiert; bekannte Minen blockieren den Kurs. Leben je
-Schwierigkeitsgrad: Leicht 3 · Mittel 2 · Schwer 1.
+Ein minenfreier Pfad ist garantiert; bekannte Minen blockieren den Kurs. Leben steigen mit
+der Minendichte: Leicht 3 · Mittel 5 · Schwer 7.
 
 ## Schwierigkeitsgrade
 
 | Stufe  | Seeminen | Leben (Patrouille) |
 |--------|----------|--------------------|
 | Leicht | 45       | 3                  |
-| Mittel | 99       | 2                  |
-| Schwer | 150      | 1                  |
+| Mittel | 99       | 5                  |
+| Schwer | 150      | 7                  |
 
 ## Steuerung
 

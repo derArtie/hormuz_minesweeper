@@ -9,8 +9,7 @@
       "Echter Tag/Nacht-Wechsel: Sonnen-/Mondlicht, Farbtemperatur, nachts Leuchtbojen entlang der Straße von Hormuz",
       "Neues Glassmorphism-HUD und animierte End-Overlays mit Bestzeiten-Vergleich; Hilfe-Overlay per ?-Taste statt Dauer-Panel",
       "Technik: Vite + TypeScript (strict), Spiellogik als getestete Engine (Vitest), InstancedMesh-Rendering, prefers-reduced-motion, ARIA-Live-Ansagen",
-      "Bestzeiten aus Version 1 werden automatisch übernommen (jetzt getrennt nach Modus)",
-      "Leben im Patrouille-Modus jetzt wie dokumentiert: Leicht 3, Mittel 2, Schwer 1"
+      "Bestzeiten aus Version 1 werden automatisch übernommen (jetzt getrennt nach Modus)"
     ]
   },
   {
