@@ -4,7 +4,8 @@ import type { Game } from '../engine/game';
 import { cellIndex, waterCells } from '../engine/map';
 import type { Cell, Mark } from '../engine/types';
 import { cellToWorld } from './cameraRig';
-import { NUMBER_COLORS, TILE_A, TILE_B, TILE_HOVER } from './palette';
+import { TILE_A, TILE_B, TILE_HOVER } from './palette';
+import { digitTexture, glyphTexture } from './textures';
 
 const TILE_TOP = 0.22;
 const TILE_HEIGHT = 0.26;
@@ -87,38 +88,6 @@ class CellInstances {
   }
 }
 
-function digitTexture(digit: number): THREE.CanvasTexture {
-  const size = 128;
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d')!;
-  ctx.font = `700 ${size * 0.72}px 'JetBrains Mono', 'Courier New', monospace`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.shadowColor = 'rgba(0,10,25,0.85)';
-  ctx.shadowBlur = 10;
-  ctx.fillStyle = NUMBER_COLORS[digit];
-  ctx.fillText(String(digit), size / 2, size / 2 + 4);
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.anisotropy = 4;
-  return tex;
-}
-
-function glyphTexture(glyph: string, color: string): THREE.CanvasTexture {
-  const size = 128;
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d')!;
-  ctx.font = `700 ${size * 0.66}px 'JetBrains Mono', 'Courier New', monospace`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.shadowColor = 'rgba(0,0,0,0.7)';
-  ctx.shadowBlur = 8;
-  ctx.fillStyle = color;
-  ctx.fillText(glyph, size / 2, size / 2 + 4);
-  return new THREE.CanvasTexture(canvas);
-}
-
 function mineGeometry(): THREE.BufferGeometry {
   const parts: THREE.BufferGeometry[] = [new THREE.IcosahedronGeometry(0.24, 1)];
   const spike = () => new THREE.ConeGeometry(0.055, 0.16, 5);
@@ -196,7 +165,8 @@ export class BoardView {
     }
     this.group.add(this.tiles);
 
-    // Zahlen 1–8
+    // Zahlen 1–8 — über der maximalen Wellenhöhe, sonst verdeckt das Wasser die Ziffern
+    const DIGIT_Y = 0.2;
     const digitGeo = new THREE.PlaneGeometry(0.8, 0.8);
     digitGeo.rotateX(-Math.PI / 2);
     this.digits.push(new CellInstances(digitGeo, new THREE.MeshBasicMaterial({ visible: false }), 0)); // Index 0 unbenutzt
@@ -206,7 +176,7 @@ export class BoardView {
         transparent: true,
         depthWrite: false,
       });
-      const layer = new CellInstances(digitGeo, mat, 0.05);
+      const layer = new CellInstances(digitGeo, mat, DIGIT_Y);
       this.digits.push(layer);
       this.group.add(layer.mesh);
     }

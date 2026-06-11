@@ -10,10 +10,11 @@ const VERTEX = /* glsl */ `
   varying float vWave;
   #include <fog_pars_vertex>
 
+  // Max. Auslenkung ~0.115 — bleibt unter den Zahlen-Billboards (y = 0.2)
   float waveH(vec2 p) {
-    return (sin(p.x * 0.55 + uTime * 0.9) * 0.05 +
-            sin((p.x + p.y) * 0.32 - uTime * 0.7) * 0.07 +
-            sin(p.y * 0.48 + uTime * 1.25) * 0.045) * uWaveAmp;
+    return (sin(p.x * 0.55 + uTime * 0.9) * 0.035 +
+            sin((p.x + p.y) * 0.32 - uTime * 0.7) * 0.05 +
+            sin(p.y * 0.48 + uTime * 1.25) * 0.03) * uWaveAmp;
   }
 
   void main() {
@@ -54,7 +55,7 @@ const FRAGMENT = /* glsl */ `
     vec3 n = normalize(vNormalW);
     vec3 sun = normalize(uSunDir);
     float diff = max(dot(n, sun), 0.0);
-    vec3 col = mix(uDeep, uShallow, smoothstep(-0.14, 0.16, vWave));
+    vec3 col = mix(uDeep, uShallow, smoothstep(-0.1, 0.11, vWave));
     col *= 0.78 + 0.4 * diff;
 
     // Stilisiertes Glitzern: spiegelnder Sonnenanteil + funkelnde Zellen

@@ -227,12 +227,15 @@ function boot(): void {
     });
     game.on('shipMoved', (_from, to) => {
       scene.ship.setCell(to, true);
+      scene.ship.setNumber(game.board.count[to.r][to.c]);
       scene.rig.follow(to);
     });
     game.on('status', handleStatus);
 
     if (mode === 'patrol' && game.ship) {
       scene.ship.setCell(game.ship, false);
+      scene.ship.setNumber(null);
+      scene.ship.setNumber(game.board.count[game.ship.r][game.ship.c]);
       scene.rig.flyTo(game.ship, PATROL_INTRO_ZOOM, reducedMotion ? 0.01 : 1.8);
       scene.rig.follow(game.ship);
       announce('Patrouille gestartet. Navigiere das Schiff durch das Minenfeld zur anderen Seite.');

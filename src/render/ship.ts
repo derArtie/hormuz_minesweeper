@@ -1,8 +1,10 @@
 import * as THREE from 'three';
 import type { Cell } from '../engine/types';
 import { cellToWorld } from './cameraRig';
+import { badgeTexture } from './textures';
 
 const SLIDE_SECONDS = 0.16;
+const BADGE_POP_SECONDS = 0.28;
 
 function buildShipMesh(): THREE.Group {
   const ship = new THREE.Group();
@@ -14,11 +16,14 @@ function buildShipMesh(): THREE.Group {
   const hull = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.16, 0.32), hullMat);
   hull.position.y = 0.1;
 
-  const bow = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.3, 4), hullMat);
-  bow.rotation.z = -Math.PI / 2;
-  bow.rotation.y = Math.PI / 4;
-  bow.position.set(0.52, 0.1, 0);
-  bow.scale.z = 1.0;
+  // Bug: 4-seitiger Kegel, Transformationen in die Geometrie gebacken —
+  // Querschnitt an den Rumpf angepasst (0.16 hoch, 0.32 breit), Spitze zeigt +X
+  const bowGeo = new THREE.ConeGeometry(0.16, 0.3, 4);
+  bowGeo.rotateY(Math.PI / 4); // Diamant-Querschnitt → achsparallele Flächen
+  bowGeo.rotateZ(-Math.PI / 2); // Spitze nach +X
+  bowGeo.scale(1, 0.16 / 0.226, 0.32 / 0.226);
+  bowGeo.translate(0.53, 0.1, 0);
+  const bow = new THREE.Mesh(bowGeo, hullMat);
 
   const deck = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.08, 0.24), deckMat);
   deck.position.set(-0.02, 0.22, 0);
@@ -60,10 +65,38 @@ export class ShipView {
   private targetHeading = 0;
   private wakeTimer = 0;
 
+  /** Zahl der Zelle unter dem Schiff, schwebend über dem Mast (Pop-Animation). */
+  private readonly badge: THREE.Sprite;
+  private readonly badgeMaterial: THREE.SpriteMaterial;
+  private badgeDigit = 0;
+  private badgePop = 1;
+
   constructor() {
     this.mesh = buildShipMesh();
     this.group.add(this.mesh);
     this.group.visible = false;
+
+    this.badgeMaterial = new THREE.SpriteMaterial({ transparent: true, depthTest: false });
+    this.badge = new THREE.Sprite(this.badgeMaterial);
+    this.badge.position.set(0, 1.15, 0);
+    this.badge.renderOrder = 10;
+    this.badge.visible = false;
+    this.group.add(this.badge);
+  }
+
+  /** Zeigt die Minenzahl der Zelle unter dem Schiff (0/aus → ausblenden). */
+  setNumber(digit: number | null): void {
+    const d = digit ?? 0;
+    if (d === this.badgeDigit) return;
+    this.badgeDigit = d;
+    if (d <= 0 || d > 8) {
+      this.badge.visible = false;
+      return;
+    }
+    this.badgeMaterial.map = badgeTexture(d);
+    this.badgeMaterial.needsUpdate = true;
+    this.badge.visible = true;
+    this.badgePop = 0;
   }
 
   /** Schiff auf Zelle setzen; mit `animate` als sanfter Slide samt Drehung. */
@@ -116,5 +149,16 @@ export class ShipView {
     this.mesh.position.y = 0.04 + Math.sin(time * 1.7) * 0.025;
     this.mesh.rotation.z = Math.sin(time * 1.3) * 0.045;
     this.mesh.rotation.x = Math.cos(time * 1.1) * 0.03;
+
+    // Zahl über dem Schiff: federnder Pop beim Einblenden + sanftes Schweben
+    if (this.badge.visible) {
+      this.badgePop = Math.min(1, this.badgePop + dt / BADGE_POP_SECONDS);
+      const t = this.badgePop;
+      const overshoot = 1 + 0.45 * Math.sin(t * Math.PI) * (1 - t); // 0 → ~1.2 → 1
+      const scale = 0.72 * t * overshoot;
+      this.badge.scale.set(scale, scale, 1);
+      this.badge.position.y = 1.15 + Math.sin(time * 1.9) * 0.04;
+      this.badgeMaterial.opacity = Math.min(1, t * 1.6);
+    }
   }
 }
