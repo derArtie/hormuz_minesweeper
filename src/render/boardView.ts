@@ -138,7 +138,8 @@ function mineGeometry(): THREE.BufferGeometry {
     const g = spike();
     g.translate(0, 0.28, 0);
     g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(up, dir));
-    parts.push(g);
+    // Icosahedron ist non-indexed → alle Teile angleichen, sonst schlägt der Merge fehl
+    parts.push(g.toNonIndexed());
   }
   return mergeGeometries(parts);
 }
@@ -353,7 +354,7 @@ export class BoardView {
   /** Mine an Zelle anzeigen; `hit` = getroffene (rote) Mine. */
   showMine(cell: Cell, hit: boolean): void {
     this.revealInstant(cell, 0);
-    this.mines.add(cell, hit ? new THREE.Color('#ff4422') : new THREE.Color('#262b30'));
+    this.mines.add(cell, hit ? new THREE.Color('#ff4422') : new THREE.Color('#4a545e'));
   }
 
   setMark(cell: Cell, mark: Mark): void {

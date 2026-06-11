@@ -382,6 +382,31 @@ function boot(): void {
     }
   });
 
+  // Dev-Hook für Smoke-Tests (wird im Production-Build entfernt)
+  if (import.meta.env.DEV) {
+    Object.assign(window, {
+      __hormuz: {
+        game: () => game,
+        winNow: () => {
+          if (game.mode === 'patrol') {
+            const path = game.safePath ?? [];
+            for (let i = 1; i < path.length && game.status !== 'won'; i++)
+              game.moveShip(path[i].r - path[i - 1].r, path[i].c - path[i - 1].c);
+          } else {
+            game.revealAt(waterCells[Math.floor(waterCells.length / 2)].r, waterCells[Math.floor(waterCells.length / 2)].c);
+            for (const { r, c } of waterCells)
+              if (game.status === 'playing' && !game.board.mine[r][c]) game.revealAt(r, c);
+          }
+        },
+        loseNow: () => {
+          game.revealAt(waterCells[0].r, waterCells[0].c);
+          const mine = game.allMines()[0];
+          game.revealAt(mine.r, mine.c);
+        },
+      },
+    });
+  }
+
   // ── Game-Loop ────────────────────────────────────────────────────────
 
   newGame();

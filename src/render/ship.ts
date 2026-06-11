@@ -6,7 +6,7 @@ const SLIDE_SECONDS = 0.16;
 
 function buildShipMesh(): THREE.Group {
   const ship = new THREE.Group();
-  const hullMat = new THREE.MeshStandardMaterial({ color: '#46586c', roughness: 0.6 });
+  const hullMat = new THREE.MeshStandardMaterial({ color: '#5d728a', roughness: 0.6 });
   const deckMat = new THREE.MeshStandardMaterial({ color: '#8b9aab', roughness: 0.7 });
   const bridgeMat = new THREE.MeshStandardMaterial({ color: '#d8dde2', roughness: 0.65 });
   const funnelMat = new THREE.MeshStandardMaterial({ color: '#b3402a', roughness: 0.7 });
@@ -32,8 +32,19 @@ function buildShipMesh(): THREE.Group {
   const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.3, 4), bridgeMat);
   mast.position.set(0.22, 0.42, 0);
 
-  ship.add(hull, bow, deck, bridge, funnel, mast);
-  ship.scale.setScalar(1.05);
+  // Navigationslicht: macht das Schiff auch nachts gut sichtbar
+  const lampMat = new THREE.MeshStandardMaterial({
+    color: '#ffe9a8',
+    emissive: new THREE.Color('#ffcf5e'),
+    emissiveIntensity: 2.2,
+  });
+  const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 6), lampMat);
+  lamp.position.set(0.22, 0.58, 0);
+  const lampLight = new THREE.PointLight('#ffd47a', 1.6, 4, 2);
+  lampLight.position.set(0.22, 0.7, 0);
+
+  ship.add(hull, bow, deck, bridge, funnel, mast, lamp, lampLight);
+  ship.scale.setScalar(1.3);
   return ship;
 }
 
