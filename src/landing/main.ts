@@ -16,6 +16,8 @@ let scene: HeroScene | null = null;
 if (webglAvailable()) {
   try {
     scene = new HeroScene(heroBg);
+    // Dev-Konsole: Szene inspizierbar machen (landet nicht im Prod-Build)
+    if (import.meta.env.DEV) (window as unknown as { __hero: HeroScene }).__hero = scene;
   } catch {
     scene = null;
   }
