@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hormuz Strategic — 3D-Modellübersicht (Dev)</title>
+  <!--
+    Interne Dev-Seite: absichtlich NICHT in vite.config.ts als Build-Input
+    eingetragen, damit sie nur über den lokalen Dev-Server (npm run dev)
+    erreichbar ist und nie mit deployt wird.
+  -->
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #060d16;
+      color: #d6e2ee;
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* Ein gemeinsames WebGL-Canvas hinter allen Karten (Scissor-Rendering) */
+    #gl {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin: 0 0 4px;
+      letter-spacing: 0.04em;
+    }
+
+    .sub {
+      color: #7d93a4;
+      font-size: 0.85rem;
+      margin-bottom: 28px;
+    }
+
+    .sub .tag {
+      display: inline-block;
+      border: 1px solid #2a4a66;
+      border-radius: 999px;
+      padding: 1px 10px;
+      margin-left: 8px;
+      color: #ffc62e;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      border: 1px solid #18334a;
+      border-radius: 12px;
+      background: rgba(10, 26, 40, 0.55);
+      overflow: hidden;
+    }
+
+    .view {
+      width: 100%;
+      aspect-ratio: 1;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .view.dragging {
+      cursor: grabbing;
+    }
+
+    .meta {
+      padding: 10px 14px 12px;
+      border-top: 1px solid #122a3e;
+    }
+
+    .meta .name {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .meta .desc {
+      color: #7d93a4;
+      font-size: 0.78rem;
+      margin-top: 2px;
+      line-height: 1.4;
+    }
+
+    .meta .src {
+      color: #4a6378;
+      font-size: 0.7rem;
+      margin-top: 6px;
+      font-family: ui-monospace, Consolas, monospace;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="gl"></canvas>
+  <div class="wrap">
+    <h1>3D-Modellübersicht</h1>
+    <div class="sub">
+      Alle prozeduralen Three.js-Modelle von Hormuz Strategic — ziehen zum Drehen.
+      <span class="tag">nur lokal · dev</span>
+    </div>
+    <div id="grid"></div>
+  </div>
+  <script type="module" src="/src/dev/models.ts"></script>
+</body>
+
+</html>

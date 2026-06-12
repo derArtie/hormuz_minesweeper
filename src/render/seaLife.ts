@@ -38,50 +38,166 @@ function baseOpenCells(): Cell[] {
 
 // ── Meshes (Low-Poly, Vorwärtsrichtung = +Z) ─────────────────────────────
 
-function fishMesh(): THREE.Mesh {
-  const geo = new THREE.ConeGeometry(0.05, 0.22, 5);
-  geo.rotateX(Math.PI / 2);
-  const mat = new THREE.MeshStandardMaterial({
-    color: '#b8ccd8',
-    roughness: 0.4,
-    metalness: 0.35,
-    flatShading: true,
-  });
-  return new THREE.Mesh(geo, mat);
+function eyeMesh(r: number): THREE.Mesh {
+  return new THREE.Mesh(
+    new THREE.SphereGeometry(r, 6, 5),
+    new THREE.MeshStandardMaterial({ color: '#10161c', roughness: 0.3 }),
+  );
 }
 
-function dolphinMesh(): THREE.Group {
+export function fishMesh(): THREE.Group {
   const g = new THREE.Group();
-  const mat = new THREE.MeshStandardMaterial({ color: '#7d93a4', roughness: 0.55, flatShading: true });
-  const body = new THREE.Mesh(new THREE.SphereGeometry(0.3, 7, 6), mat);
-  body.scale.set(0.5, 0.45, 1.25);
-  const fin = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.16, 4), mat);
-  fin.position.set(0, 0.15, -0.05);
-  fin.rotation.x = -0.45;
-  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.18, 5), mat);
-  nose.geometry.rotateX(Math.PI / 2);
-  nose.position.set(0, 0, 0.4);
-  g.add(body, fin, nose);
+  const mat = new THREE.MeshStandardMaterial({ color: '#9fc1d4', roughness: 0.35, metalness: 0.45 });
+  const finMat = new THREE.MeshStandardMaterial({ color: '#76a0b8', roughness: 0.5, metalness: 0.3 });
+
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.06, 10, 8), mat);
+  body.scale.set(0.55, 0.85, 1.9);
+
+  // Gegabelte Schwanzflosse: zwei flache Spitzen, vertikal gespreizt
+  const tailGeo = new THREE.ConeGeometry(0.026, 0.08, 4);
+  tailGeo.scale(0.3, 1, 1);
+  for (const side of [-1, 1]) {
+    const tail = new THREE.Mesh(tailGeo, finMat);
+    tail.position.set(0, side * 0.02, -0.13);
+    tail.rotation.x = -Math.PI / 2 + side * 0.6;
+    g.add(tail);
+  }
+
+  const dorsal = new THREE.Mesh(new THREE.ConeGeometry(0.022, 0.05, 4), finMat);
+  dorsal.scale.set(0.4, 1, 1);
+  dorsal.position.set(0, 0.055, -0.01);
+  dorsal.rotation.x = -0.5;
+
+  const pecGeo = new THREE.ConeGeometry(0.016, 0.05, 4);
+  pecGeo.scale(0.35, 1, 1);
+  for (const side of [-1, 1]) {
+    const pec = new THREE.Mesh(pecGeo, finMat);
+    pec.position.set(side * 0.032, -0.012, 0.035);
+    pec.rotation.set(0.4, 0, -side * 2.1);
+    g.add(pec);
+  }
+
+  const eyeL = eyeMesh(0.009);
+  eyeL.position.set(0.026, 0.014, 0.082);
+  const eyeR = eyeMesh(0.009);
+  eyeR.position.set(-0.026, 0.014, 0.082);
+
+  g.add(body, dorsal, eyeL, eyeR);
   return g;
 }
 
-function whaleMesh(): THREE.Group {
+export function dolphinMesh(): THREE.Group {
   const g = new THREE.Group();
-  const mat = new THREE.MeshStandardMaterial({ color: '#42505c', roughness: 0.7, flatShading: true });
-  const body = new THREE.Mesh(new THREE.SphereGeometry(0.6, 9, 7), mat);
-  body.scale.set(0.85, 0.7, 2.1);
-  const hump = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.14, 4), mat);
-  hump.position.set(0, 0.42, -0.35);
-  const flukeGeo = new THREE.ConeGeometry(0.3, 0.55, 4);
+  const mat = new THREE.MeshStandardMaterial({ color: '#7d93a4', roughness: 0.45 });
+  const bellyMat = new THREE.MeshStandardMaterial({ color: '#b6c5d0', roughness: 0.5 });
+
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.3, 14, 12), mat);
+  body.scale.set(0.5, 0.45, 1.25);
+
+  const belly = new THREE.Mesh(new THREE.SphereGeometry(0.27, 12, 10), bellyMat);
+  belly.scale.set(0.46, 0.4, 1.18);
+  belly.position.set(0, -0.05, 0.03);
+
+  // Melone (Stirn) und Schnauze mit runder Spitze
+  const melon = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 8), mat);
+  melon.position.set(0, 0.035, 0.32);
+  const noseGeo = new THREE.ConeGeometry(0.05, 0.18, 8);
+  noseGeo.rotateX(Math.PI / 2);
+  const nose = new THREE.Mesh(noseGeo, mat);
+  nose.position.set(0, -0.015, 0.42);
+  const tip = new THREE.Mesh(new THREE.SphereGeometry(0.016, 6, 5), mat);
+  tip.position.set(0, -0.015, 0.51);
+
+  // Finne: schmal, nach hinten geneigt
+  const fin = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.17, 6), mat);
+  fin.scale.set(0.35, 1, 1);
+  fin.position.set(0, 0.18, -0.05);
+  fin.rotation.x = -0.55;
+
+  const pecGeo = new THREE.ConeGeometry(0.035, 0.16, 5);
+  pecGeo.scale(0.35, 1, 1);
+  for (const side of [-1, 1]) {
+    const pec = new THREE.Mesh(pecGeo, mat);
+    pec.position.set(side * 0.12, -0.08, 0.16);
+    pec.rotation.set(0.5, 0, -side * 2.2);
+    g.add(pec);
+  }
+
+  // Schwanzstiel + horizontale Fluke
+  const stockGeo = new THREE.ConeGeometry(0.085, 0.4, 8);
+  stockGeo.rotateX(-Math.PI / 2);
+  const stock = new THREE.Mesh(stockGeo, mat);
+  stock.position.set(0, 0.01, -0.45);
+  const flukeGeo = new THREE.ConeGeometry(0.06, 0.17, 5);
   flukeGeo.rotateX(Math.PI / 2);
   for (const side of [-1, 1]) {
     const fluke = new THREE.Mesh(flukeGeo, mat);
-    fluke.scale.set(1, 0.18, 1);
-    fluke.position.set(side * 0.22, 0.05, -1.35);
-    fluke.rotation.y = side * 0.75 + Math.PI;
+    fluke.scale.set(1, 0.22, 1);
+    fluke.position.set(side * 0.045, 0.015, -0.63);
+    fluke.rotation.y = side * 0.85 + Math.PI;
     g.add(fluke);
   }
-  g.add(body, hump);
+
+  const eyeL = eyeMesh(0.016);
+  eyeL.position.set(0.092, 0.01, 0.3);
+  const eyeR = eyeMesh(0.016);
+  eyeR.position.set(-0.092, 0.01, 0.3);
+
+  g.add(body, belly, melon, nose, tip, fin, stock, eyeL, eyeR);
+  return g;
+}
+
+export function whaleMesh(): THREE.Group {
+  const g = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({ color: '#42505c', roughness: 0.65 });
+  const bellyMat = new THREE.MeshStandardMaterial({ color: '#67767f', roughness: 0.7 });
+
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.6, 18, 14), mat);
+  body.scale.set(0.85, 0.7, 2.1);
+
+  const belly = new THREE.Mesh(new THREE.SphereGeometry(0.55, 16, 12), bellyMat);
+  belly.scale.set(0.78, 0.62, 1.95);
+  belly.position.set(0, -0.12, 0.06);
+
+  // Buckel + Blasloch-Wulst
+  const hump = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.14, 5), mat);
+  hump.position.set(0, 0.44, -0.45);
+  hump.rotation.x = -0.4;
+  const blow = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 6), mat);
+  blow.scale.set(1, 0.5, 1.6);
+  blow.position.set(0, 0.41, 0.55);
+
+  // Schwanzstiel + Fluke
+  const stockGeo = new THREE.ConeGeometry(0.17, 0.75, 8);
+  stockGeo.rotateX(-Math.PI / 2);
+  const stock = new THREE.Mesh(stockGeo, mat);
+  stock.position.set(0, 0.03, -1.45);
+  const flukeGeo = new THREE.ConeGeometry(0.3, 0.6, 6);
+  flukeGeo.rotateX(Math.PI / 2);
+  for (const side of [-1, 1]) {
+    const fluke = new THREE.Mesh(flukeGeo, mat);
+    fluke.scale.set(1, 0.16, 1);
+    fluke.position.set(side * 0.2, 0.06, -1.78);
+    fluke.rotation.y = side * 0.8 + Math.PI;
+    g.add(fluke);
+  }
+
+  // Lange Brustflossen (Buckelwal)
+  const pecGeo = new THREE.ConeGeometry(0.1, 0.55, 5);
+  pecGeo.scale(1, 1, 0.3);
+  for (const side of [-1, 1]) {
+    const pec = new THREE.Mesh(pecGeo, mat);
+    pec.position.set(side * 0.55, -0.18, 0.5);
+    pec.rotation.set(0.3, side * 0.5, -side * 1.9);
+    g.add(pec);
+  }
+
+  const eyeL = eyeMesh(0.045);
+  eyeL.position.set(0.42, 0, 0.7);
+  const eyeR = eyeMesh(0.045);
+  eyeR.position.set(-0.42, 0, 0.7);
+
+  g.add(body, belly, hump, blow, stock, eyeL, eyeR);
   return g;
 }
 
@@ -99,7 +215,7 @@ class FishSchool implements SeaEvent {
   readonly group = new THREE.Group();
   private t = 0;
   private readonly fish: {
-    mesh: THREE.Mesh;
+    mesh: THREE.Group;
     from: THREE.Vector3;
     delay: number;
     splashed: [boolean, boolean];
