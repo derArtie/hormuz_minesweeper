@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { COLS, ROWS, isLand, isPlayable } from '../engine/map';
 import { DAY, NIGHT, type Mood } from './palette';
+import { buildBuoyMesh } from './props';
 import type { Water } from './water';
 
 const TRANSITION_SECONDS = 1.4;
@@ -58,9 +59,6 @@ export class DayNight {
     this.scene.fog = new THREE.Fog(0x000000, 60, 220);
 
     this.buoys = new THREE.Group();
-    const bulbGeo = new THREE.SphereGeometry(0.16, 8, 6);
-    const baseGeo = new THREE.CylinderGeometry(0.1, 0.22, 0.5, 6);
-    const baseMat = new THREE.MeshStandardMaterial({ color: '#b3402a', roughness: 0.8 });
     // Echte PointLights sind teuer (Forward-Rendering): nur jede zweite Boje
     // bekommt eine, gedeckelt — alle leuchten aber über ihr Emissive-Material.
     const positions = buoyPositions();
@@ -71,11 +69,9 @@ export class DayNight {
         emissive: new THREE.Color('#ffb347'),
         emissiveIntensity: 0,
       });
-      const bulb = new THREE.Mesh(bulbGeo, bulbMat);
-      bulb.position.set(x, 0.62, z);
-      const base = new THREE.Mesh(baseGeo, baseMat);
-      base.position.set(x, 0.25, z);
-      this.buoys.add(bulb, base);
+      const buoy = buildBuoyMesh(bulbMat);
+      buoy.position.set(x, 0, z);
+      this.buoys.add(buoy);
       this.buoyBulbs.push(bulbMat);
       if (i % 2 === 0 && this.buoyLights.length < maxLights) {
         const light = new THREE.PointLight('#ffb347', 0, 9, 2);

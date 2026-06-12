@@ -1,6 +1,51 @@
 import * as THREE from 'three';
-import { COLS, ROWS } from '../engine/map';
+import { COLS, ROWS, isLand } from '../engine/map';
 import { DAY } from './palette';
+
+/** Maximal codierte Küstendistanz in Zellen (darüber: offene See, kein Schaum). */
+const COAST_MAX = 31;
+
+/**
+ * Distanzfeld zur nächsten Landzelle als Textur (1 Texel pro Zelle, inkl.
+ * Rand) — der Shader formt daraus Brandungsfronten, die auf die Küste
+ * zulaufen. 4er-BFS von allen Landzellen aus.
+ */
+function coastTexture(margin: number): THREE.DataTexture {
+  const W = COLS + margin * 2;
+  const H = ROWS + margin * 2;
+  // Chamfer-Distanztransformation (2 Pässe, diagonal ≈ 1.4): nahezu
+  // euklidische Distanzen — Brandungsringe um Inseln bleiben rund statt rautig
+  const dist = new Float32Array(W * H).fill(COAST_MAX);
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++) if (isLand[r][c]) dist[(r + margin) * W + (c + margin)] = 0;
+  const relax = (i: number, j: number, cost: number) => {
+    if (dist[j] + cost < dist[i]) dist[i] = dist[j] + cost;
+  };
+  for (let y = 0; y < H; y++)
+    for (let x = 0; x < W; x++) {
+      const i = y * W + x;
+      if (x > 0) relax(i, i - 1, 1);
+      if (y > 0) relax(i, i - W, 1);
+      if (x > 0 && y > 0) relax(i, i - W - 1, 1.4);
+      if (x < W - 1 && y > 0) relax(i, i - W + 1, 1.4);
+    }
+  for (let y = H - 1; y >= 0; y--)
+    for (let x = W - 1; x >= 0; x--) {
+      const i = y * W + x;
+      if (x < W - 1) relax(i, i + 1, 1);
+      if (y < H - 1) relax(i, i + W, 1);
+      if (x < W - 1 && y < H - 1) relax(i, i + W + 1, 1.4);
+      if (x > 0 && y < H - 1) relax(i, i + W - 1, 1.4);
+    }
+  const data = new Uint8Array(W * H);
+  for (let i = 0; i < data.length; i++)
+    data[i] = Math.round((Math.min(dist[i], COAST_MAX) / COAST_MAX) * 255);
+  const tex = new THREE.DataTexture(data, W, H, THREE.RedFormat, THREE.UnsignedByteType);
+  tex.magFilter = THREE.LinearFilter;
+  tex.minFilter = THREE.LinearFilter;
+  tex.needsUpdate = true;
+  return tex;
+}
 
 const VERTEX = /* glsl */ `
   uniform float uTime;
@@ -42,10 +87,18 @@ const FRAGMENT = /* glsl */ `
   uniform vec3 uSparkle;
   uniform float uSparkleStrength;
   uniform vec3 uSunDir;
+  uniform sampler2D uCoast;
+  uniform vec2 uCoastHalf;
   varying vec3 vNormalW;
   varying vec3 vWorldPos;
   varying float vWave;
   #include <fog_pars_fragment>
+
+  // Distanz zur nächsten Küste in Zellen (aus dem vorberechneten Distanzfeld)
+  float coastDist(vec2 p) {
+    vec2 uv = (p + uCoastHalf) / (2.0 * uCoastHalf);
+    return texture2D(uCoast, uv).r * 31.0;
+  }
 
   // Weiches Value-Noise — stetig in Raum und Zeit, keine sichtbaren Zellen
   float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
@@ -101,6 +154,16 @@ const FRAGMENT = /* glsl */ `
 
     col += uSparkle * (glitter + sheen + crest * (0.4 + 0.6 * diff)) * uSparkleStrength;
 
+    // Vereinzelte Brandung: Schaumfronten laufen in langsam driftenden
+    // Patches auf die Küste zu und verebben kurz davor
+    float dCoast = coastDist(p);
+    float phase = fract(dCoast * 0.55 + uTime * 0.22);
+    float front = smoothstep(0.2, 0.42, phase) * smoothstep(0.72, 0.52, phase);
+    float nearShore = smoothstep(3.0, 0.45, dCoast) * smoothstep(0.0, 0.35, dCoast);
+    float surfPatch = smoothstep(0.4, 0.78, vnoise(p * 0.45 + vec2(uTime * 0.06, -uTime * 0.045)));
+    float surf = front * nearShore * surfPatch;
+    col = mix(col, uSparkle, surf * 0.4 * (0.55 + 0.45 * uSparkleStrength));
+
     gl_FragColor = vec4(col, 1.0);
     #include <fog_fragment>
   }
@@ -116,6 +179,8 @@ export interface Water {
     uSparkle: THREE.IUniform<THREE.Color>;
     uSparkleStrength: THREE.IUniform<number>;
     uSunDir: THREE.IUniform<THREE.Vector3>;
+    uCoast: THREE.IUniform<THREE.DataTexture>;
+    uCoastHalf: THREE.IUniform<THREE.Vector2>;
   };
 }
 
@@ -134,6 +199,8 @@ export function createWater(): Water {
     uSparkle: { value: DAY.sparkle.clone() },
     uSparkleStrength: { value: DAY.sparkleStrength },
     uSunDir: { value: DAY.sunDir.clone() },
+    uCoast: { value: coastTexture(margin) },
+    uCoastHalf: { value: new THREE.Vector2(width / 2, depth / 2) },
   };
 
   const material = new THREE.ShaderMaterial({

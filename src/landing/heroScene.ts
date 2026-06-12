@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { mineGeometry } from '../render/mineGeometry';
+import { dolphinMesh, whaleMesh } from '../render/seaLife';
 import { buildShipMesh } from '../render/ship';
 import { createWater, type Water } from '../render/water';
 
@@ -39,6 +40,24 @@ interface Mine {
   phase: number;
 }
 
+interface DolphinEscort {
+  kind: 'dolphins';
+  group: THREE.Group;
+  t: number;
+  pod: { mesh: THREE.Group; lag: number; side: number; phase: number }[];
+}
+
+interface WhaleSighting {
+  kind: 'whale';
+  group: THREE.Group;
+  t: number;
+  mesh: THREE.Group;
+  offX: number;
+  offZ: number;
+}
+
+type Escort = DolphinEscort | WhaleSighting;
+
 /**
  * Kino-Hintergrund der Startseite: ein Patrouillenschiff pflügt nachts durch
  * stürmische See, vorbei an treibenden Seeminen — mit Mond, Regen und Blitzen.
@@ -64,6 +83,8 @@ export class HeroScene {
   private nextLightning = 5;
   private flashT = 0;
   private scrollProgress = 0;
+  private escort: Escort | null = null;
+  private nextEscortIn = 9;
 
   /** Seitliche Reichweite der Schiffsdrift — aspektabhängig, damit das Schiff im Bild bleibt. */
   private shipRange = 3;
@@ -170,6 +191,100 @@ export class HeroScene {
     window.addEventListener('resize', () => this.resize());
   }
 
+  /** Delfine eskortieren das Schiff; selten zieht ein Wal im Hintergrund mit. */
+  private spawnEscort(): void {
+    const group = new THREE.Group();
+    if (Math.random() < 0.3) {
+      const mesh = whaleMesh();
+      mesh.scale.setScalar(1.5);
+      group.add(mesh);
+      this.escort = {
+        kind: 'whale',
+        group,
+        t: 0,
+        mesh,
+        offX: -7 + Math.random() * 10,
+        offZ: -3.5 - Math.random() * 4,
+      };
+    } else {
+      const pod: DolphinEscort['pod'] = [];
+      const n = 3 + Math.floor(Math.random() * 2);
+      for (let i = 0; i < n; i++) {
+        const mesh = dolphinMesh();
+        mesh.scale.setScalar(1.25);
+        group.add(mesh);
+        pod.push({
+          mesh,
+          lag: i * 1.1 + Math.random() * 0.3,
+          side: (i % 2 === 0 ? 1 : -1) * Math.ceil(i / 2) * 0.8,
+          phase: Math.random() * 1.2,
+        });
+      }
+      this.escort = { kind: 'dolphins', group, t: 0, pod };
+    }
+    this.scene.add(group);
+  }
+
+  private clearEscort(): void {
+    if (this.escort) this.scene.remove(this.escort.group);
+    this.escort = null;
+    this.nextEscortIn = 16 + Math.random() * 18;
+  }
+
+  private updateEscort(dt: number, shipX: number, shipZ: number): void {
+    if (!this.escort) {
+      this.nextEscortIn -= dt;
+      if (this.nextEscortIn <= 0) this.spawnEscort();
+      return;
+    }
+    const e = this.escort;
+    e.t += dt;
+    const next = new THREE.Vector3();
+
+    if (e.kind === 'dolphins') {
+      // Die Delfine kommen von hinten, überholen porpoising längsseits
+      // und tauchen ein Stück vor dem Bug ab — schneller als das Schiff,
+      // wie es sich für eine Bugwellen-Eskorte gehört.
+      const sBase = -9 + e.t * 1.4;
+      for (const d of e.pod) {
+        const s = sBase - d.lag;
+        const sample = (ss: number, out: THREE.Vector3) => {
+          const x = shipX + ss;
+          const z = shipZ + 2.1 + d.side;
+          const arc = Math.sin(((ss + d.phase) * Math.PI * 2) / 3.6);
+          let y = waveHeight(x, z, this.time, this.amp) * 0.5 - 0.3 + 0.85 * arc;
+          if (ss > 8) y -= (ss - 8) * 1.4; // vor dem Schiff abtauchen
+          return out.set(x, y, z);
+        };
+        sample(s, d.mesh.position);
+        d.mesh.lookAt(sample(s + 0.2, next));
+      }
+      if (sBase - e.pod[e.pod.length - 1].lag > 11) this.clearEscort();
+      return;
+    }
+
+    // Wal: schwimmt im Hintergrund mit dem Schiff mit — auftauchen,
+    // kurz an der Oberfläche wogen, mit gesenkter Nase wieder abtauchen
+    const x = shipX + e.offX + e.t * 0.12;
+    const z = shipZ + e.offZ;
+    const swell = waveHeight(x, z, this.time, this.amp) * 0.4;
+    let y: number;
+    let droop = 0;
+    if (e.t < 2.2) {
+      const k = THREE.MathUtils.smoothstep(e.t / 2.2, 0, 1);
+      y = THREE.MathUtils.lerp(-2.6, -0.22, k) + swell * k;
+    } else if (e.t < 6.4) {
+      y = -0.22 + swell;
+    } else {
+      const k = Math.min(1, (e.t - 6.4) / 2.4);
+      y = THREE.MathUtils.lerp(-0.22 + swell, -3.0, k * k);
+      droop = k * 1.6;
+    }
+    e.mesh.position.set(x, y, z);
+    e.mesh.lookAt(next.set(x + 1.5, y - droop, z));
+    if (e.t > 9.2) this.clearEscort();
+  }
+
   private respawnMine(mine: Mine, initial: boolean): void {
     mine.mesh.position.set(
       initial ? -16 + Math.random() * 44 : 26 + Math.random() * 14,
@@ -240,6 +355,9 @@ export class HeroScene {
       mine.mesh.rotation.x = Math.sin(t * 0.8 + mine.phase) * 0.18;
       if (p.x < -26) this.respawnMine(mine, false);
     }
+
+    // Meeresleben schwimmt mit dem Schiff (entfällt bei reduced motion)
+    if (!this.reduced) this.updateEscort(dt, shipX, shipZ);
 
     // Regen fällt schräg im Wind
     if (this.rain && this.rainVel) {

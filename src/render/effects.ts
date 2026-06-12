@@ -131,16 +131,17 @@ export class Effects {
     this.flashDecay = 1;
   }
 
-  spawnSplash(pos: THREE.Vector3): void {
-    const n = Math.round(6 * this.budget);
+  spawnSplash(pos: THREE.Vector3, power = 1): void {
+    const n = Math.round(6 * power * this.budget);
+    const k = Math.sqrt(power);
     const foam = new THREE.Color('#bfe3ff');
     for (let i = 0; i < n; i++) {
       const vel = new THREE.Vector3(
-        (Math.random() - 0.5) * 1.6,
-        1.2 + Math.random() * 1.6,
-        (Math.random() - 0.5) * 1.6,
+        (Math.random() - 0.5) * 1.6 * k,
+        (1.2 + Math.random() * 1.6) * k,
+        (Math.random() - 0.5) * 1.6 * k,
       );
-      this.spawn(pos, vel, foam, 0.3 + Math.random() * 0.25, 2.4, 7);
+      this.spawn(pos, vel, foam, (0.3 + Math.random() * 0.25) * k, 2.4 / k, 7);
     }
   }
 

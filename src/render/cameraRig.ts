@@ -57,6 +57,11 @@ export class CameraRig {
     return this.zoom;
   }
 
+  /** Aktueller Blickpunkt auf der Wasserebene (read-only verwenden). */
+  get focus(): THREE.Vector3 {
+    return this.target;
+  }
+
   private get distance(): number {
     return this.fitDistance / this.zoom;
   }

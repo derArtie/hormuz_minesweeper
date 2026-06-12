@@ -49,7 +49,51 @@ export function buildShipMesh(): THREE.Group {
   const lampLight = new THREE.PointLight('#ffd47a', 1.6, 4, 2);
   lampLight.position.set(0.22, 0.7, 0);
 
-  ship.add(hull, bow, deck, bridge, funnel, mast, lamp, lampLight);
+  // Detail-Pass: Wasserlinie, Brückenfenster, Schornsteinkappe, Radar,
+  // Buggeschütz, Rettungsinseln und Heckaufbau
+  const darkMat = new THREE.MeshStandardMaterial({ color: '#2e3a47', roughness: 0.7 });
+  const waterline = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.05, 0.335), darkMat);
+  waterline.position.y = 0.045;
+
+  const windowMat = new THREE.MeshStandardMaterial({
+    color: '#16222e',
+    roughness: 0.25,
+    metalness: 0.4,
+  });
+  const windows = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.05, 0.17), windowMat);
+  windows.position.set(0.175, 0.365, 0);
+
+  const funnelCap = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.03, 6), darkMat);
+  funnelCap.position.set(-0.14, 0.455, 0);
+
+  const radar = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.018, 0.12), bridgeMat);
+  radar.position.set(0.22, 0.53, 0);
+
+  const gunBase = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.055, 0.06, 7), deckMat);
+  gunBase.position.set(0.33, 0.21, 0);
+  const turret = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.05, 0.06), bridgeMat);
+  turret.position.set(0.33, 0.255, 0);
+  const barrelGeo = new THREE.CylinderGeometry(0.008, 0.01, 0.14, 5);
+  barrelGeo.rotateZ(-Math.PI / 2); // Lauf zeigt +X
+  barrelGeo.translate(0.42, 0.27, 0);
+  const barrel = new THREE.Mesh(barrelGeo, darkMat);
+
+  const boatGeo = new THREE.CapsuleGeometry(0.022, 0.07, 3, 6);
+  boatGeo.rotateZ(Math.PI / 2); // längs zur Fahrtrichtung
+  const boatMat = new THREE.MeshStandardMaterial({ color: '#c8743c', roughness: 0.8 });
+  for (const side of [-1, 1]) {
+    const boat = new THREE.Mesh(boatGeo, boatMat);
+    boat.position.set(-0.08, 0.285, side * 0.135);
+    ship.add(boat);
+  }
+
+  const stern = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.07, 0.16), deckMat);
+  stern.position.set(-0.3, 0.215, 0);
+
+  ship.add(
+    hull, bow, deck, bridge, funnel, mast, lamp, lampLight,
+    waterline, windows, funnelCap, radar, gunBase, turret, barrel, stern,
+  );
   ship.scale.setScalar(1.3);
   return ship;
 }

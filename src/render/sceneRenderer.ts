@@ -5,6 +5,7 @@ import { CameraRig } from './cameraRig';
 import { DayNight } from './dayNight';
 import { ConfettiOverlay, Effects } from './effects';
 import { createLabels } from './labels';
+import { SeaLife } from './seaLife';
 import { ShipView } from './ship';
 import { createTerrain } from './terrain';
 import { createWater, type Water } from './water';
@@ -30,6 +31,7 @@ export class SceneRenderer {
   readonly effects: Effects;
   readonly confetti: ConfettiOverlay;
   readonly dayNight: DayNight;
+  readonly seaLife: SeaLife;
   readonly canvas: HTMLCanvasElement;
 
   private readonly renderer: THREE.WebGLRenderer;
@@ -73,6 +75,10 @@ export class SceneRenderer {
     this.board.onSplash = (pos) => this.effects.spawnSplash(pos);
     this.ship.onWake = (pos) => this.effects.spawnWake(pos);
 
+    this.seaLife = new SeaLife(() => this.rig.focus);
+    this.seaLife.onSplash = (pos, power) => this.effects.spawnSplash(pos, power);
+    this.scene.add(this.seaLife.group);
+
     this.confetti = new ConfettiOverlay(container);
     this.dayNight = new DayNight(this.scene, this.water, startDay);
 
@@ -105,6 +111,7 @@ export class SceneRenderer {
     this.board.update(dt, this.time);
     this.ship.update(dt, this.time);
     this.effects.update(dt);
+    if (!this.reducedMotion) this.seaLife.update(dt);
     this.confetti.update(dt);
     this.dayNight.update(dt, this.time);
   }

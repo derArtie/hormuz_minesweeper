@@ -5,6 +5,7 @@ import type { Cell, Mark } from '../engine/types';
 import { cellToWorld } from './cameraRig';
 import { mineGeometry } from './mineGeometry';
 import { TILE_A, TILE_B, TILE_HOVER } from './palette';
+import { flagClothGeometry, flagPoleGeometry } from './props';
 import { digitTexture, glyphTexture } from './textures';
 
 const TILE_TOP = 0.22;
@@ -157,22 +158,15 @@ export class BoardView {
     }
 
     // Flaggen (Mast + Tuch als getrennte Instanz-Layer mit gleichen Zellen)
-    const poleGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.55, 5);
-    poleGeo.translate(-0.08, 0.27, 0);
     const poleMat = new THREE.MeshStandardMaterial({ color: '#e8e8e8', roughness: 0.6 });
-    this.flagPoles = new CellInstances(poleGeo, poleMat, TILE_TOP);
+    this.flagPoles = new CellInstances(flagPoleGeometry(), poleMat, TILE_TOP);
 
-    const clothGeo = new THREE.BufferGeometry();
-    clothGeo.setAttribute(
-      'position',
-      new THREE.Float32BufferAttribute(
-        [-0.08, 0.52, 0, 0.26, 0.42, 0, -0.08, 0.32, 0],
-        3,
-      ),
-    );
-    clothGeo.computeVertexNormals();
-    const clothMat = new THREE.MeshBasicMaterial({ color: '#e23a2e', side: THREE.DoubleSide });
-    this.flagCloths = new CellInstances(clothGeo, clothMat, TILE_TOP);
+    const clothMat = new THREE.MeshStandardMaterial({
+      color: '#e23a2e',
+      roughness: 0.7,
+      side: THREE.DoubleSide,
+    });
+    this.flagCloths = new CellInstances(flagClothGeometry(), clothMat, TILE_TOP);
     this.group.add(this.flagPoles.mesh, this.flagCloths.mesh);
 
     // Fragezeichen
