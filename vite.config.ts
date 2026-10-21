@@ -32,7 +32,6 @@ export default defineConfig({
     target: 'es2022',
     rollupOptions: {
       input: {
-        home: resolve(__dirname, 'index.html'),
         app: resolve(__dirname, 'zeiterfassung/index.html'),
         appPrivacy: resolve(__dirname, 'zeiterfassung/datenschutz/index.html'),
         ...(GAME_ONLINE ? gamePages : {}),
