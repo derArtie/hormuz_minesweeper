@@ -96,7 +96,7 @@ npm run preview    # Production-Build lokal testen
 
 | Adresse | Datei | Inhalt |
 |---|---|---|
-| `/` | `index.html` | leitet auf `/zeiterfassung/` weiter |
+| `/` | – | keine Seite (404) |
 | `/zeiterfassung/` | `zeiterfassung/index.html` | Startseite der App (für den Google-Anmeldebildschirm) |
 | `/zeiterfassung/datenschutz/` | `zeiterfassung/datenschutz/index.html` | Datenschutzerklärung der App und der Website |
 
