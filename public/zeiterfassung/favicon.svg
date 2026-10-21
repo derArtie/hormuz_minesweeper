@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="12 12 84 84">
+  <!-- App-Symbol der Zeiterfassung: Minkas Gesicht, übertragen aus ic_launcher_foreground/background der App -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="108" y2="108" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3B5BFD" />
+      <stop offset="1" stop-color="#8A5CFF" />
+    </linearGradient>
+    <clipPath id="head">
+      <path d="M99.4,56.8Q111,63.4 97.7,63.9Q108.9,75.4 93.6,70.3Q96.3,79.3 87.7,75.4Q86.4,82 80.3,78.9Q77.2,84.6 72.1,80.4Q67.6,85.2 63.8,79.9Q58.2,83.5 55.9,77.4Q49.1,80.5 49.2,73.1Q37.3,78.2 44.1,67.3Q28,70.2 41.2,60.5Q31.8,57.6 40.6,53.2Q36.2,48.4 42.3,46.1Q40,40.2 46.4,39.7Q46,33.4 52.3,34.6Q53.8,28.3 59.7,31.1Q62.8,25.4 67.9,29.6Q72.4,24.8 76.2,30.1Q81.7,26.5 84.1,32.6Q90.2,30.5 90.8,36.9Q97.2,36.5 95.9,42.7Q102.1,44.1 98.8,49.5Q105.6,52.6 99.4,56.8Z" />
+    </clipPath>
+  </defs>
+  <rect x="12" y="12" width="84" height="84" rx="20" fill="url(#bg)" />
+  <g transform="translate(-3.4,14) scale(0.82)">
+    <!-- Ohren -->
+    <path d="M43,46 L37,14 L63,33 Z" fill="#F0A35A" stroke="#EE9F55" stroke-width="6" stroke-linejoin="round" />
+    <path d="M97,46 L103,14 L77,33 Z" fill="#3A3238" stroke="#3A3238" stroke-width="6" stroke-linejoin="round" />
+    <path d="M45,41 L42,20 L58,34 Z" fill="#FFB3BE" />
+    <path d="M95,41 L98,20 L82,34 Z" fill="#E894A3" />
+    <!-- Kopf -->
+    <path fill="#FFF6EC" d="M99.4,56.8Q111,63.4 97.7,63.9Q108.9,75.4 93.6,70.3Q96.3,79.3 87.7,75.4Q86.4,82 80.3,78.9Q77.2,84.6 72.1,80.4Q67.6,85.2 63.8,79.9Q58.2,83.5 55.9,77.4Q49.1,80.5 49.2,73.1Q37.3,78.2 44.1,67.3Q28,70.2 41.2,60.5Q31.8,57.6 40.6,53.2Q36.2,48.4 42.3,46.1Q40,40.2 46.4,39.7Q46,33.4 52.3,34.6Q53.8,28.3 59.7,31.1Q62.8,25.4 67.9,29.6Q72.4,24.8 76.2,30.1Q81.7,26.5 84.1,32.6Q90.2,30.5 90.8,36.9Q97.2,36.5 95.9,42.7Q102.1,44.1 98.8,49.5Q105.6,52.6 99.4,56.8Z" />
+    <g clip-path="url(#head)">
+      <path fill="#F0A35A" d="M35,30 L68,25 C70,40 66,52 60,62 C52,66 42,64 35,62 Z" />
+      <path fill="#3A3238" d="M75,25 L105,28 L105,52 C96,50 88,46 84,41 C79,37 76,32 75,25 Z" />
+      <path d="M45,33 l3,5 M52,30 l2,5" fill="none" stroke="#DB8239" stroke-width="2.4" stroke-linecap="round" />
+    </g>
+    <!-- Schnauze und Wangen -->
+    <path fill="#FFFFFF" d="M56.5,67a13.5,9 0,1 0,27 0a13.5,9 0,1 0,-27 0Z" />
+    <path fill="#FF8FA0" fill-opacity="0.45" d="M42,65a7,5 0,1 0,14 0a7,5 0,1 0,-14 0Z M84,65a7,5 0,1 0,14 0a7,5 0,1 0,-14 0Z" />
+    <!-- Augen -->
+    <path fill="#2A2433" d="M52.5,55a5,6.3 0,1 0,10 0a5,6.3 0,1 0,-10 0Z M77.5,55a5,6.3 0,1 0,10 0a5,6.3 0,1 0,-10 0Z" />
+    <path fill="#FFFFFF" d="M57.2,52.6a2.1,2.1 0,1 0,4.2 0a2.1,2.1 0,1 0,-4.2 0Z M82.2,52.6a2.1,2.1 0,1 0,4.2 0a2.1,2.1 0,1 0,-4.2 0Z" />
+    <!-- Nase, Mund, Schnurrhaare -->
+    <path fill="#FF8C9E" d="M67,62.5 h6 l-3,3.4 z" />
+    <path d="M64,67.5 Q67,70.5 70,67.5 Q73,70.5 76,67.5" fill="none" stroke="#2A2433" stroke-width="1.8" stroke-linecap="round" />
+    <path d="M56,65 L38,61 M56,68 L38,70 M84,65 L102,61 M84,68 L102,70" fill="none" stroke="#2A2433" stroke-opacity="0.35" stroke-width="1" stroke-linecap="round" />
+  </g>
+</svg>
