@@ -89,6 +89,23 @@ npm run build      # Type-Check + Production-Build nach dist/
 npm run preview    # Production-Build lokal testen
 ```
 
+## Seiten auf heyartur.de
+
+| Adresse | Datei | Inhalt |
+|---|---|---|
+| `/` | `index.html` | Übersicht über die Projekte |
+| `/hormuz/` | `hormuz/index.html` | Infoseite zum Spiel mit 3D-Hero |
+| `/minesweeper/` | `minesweeper/index.html` | das Spiel |
+| `/zeiterfassung/` | `zeiterfassung/index.html` | Startseite der Android-App (für den Google-Anmeldebildschirm) |
+| `/zeiterfassung/datenschutz/` | `zeiterfassung/datenschutz/index.html` | Datenschutzerklärung der App |
+| `/impressum/`, `/datenschutz/` | `impressum/`, `datenschutz/` | Impressum und Datenschutz der Website |
+
+Übersicht, App- und Rechtsseiten teilen sich `src/site/site.css`. Neue Seiten müssen in `vite.config.ts` unter
+`rollupOptions.input` eingetragen werden, sonst fehlen sie im Build.
+
+`npm run build` bricht ab, solange in einer Seite noch Platzhalter wie `[[E-MAIL]]` stehen
+(`scripts/check-placeholders.mjs`). So gehen Impressum und Datenschutz nicht halb ausgefüllt online.
+
 ## Deployment
 
 Push auf `main` baut und deployt automatisch über die GitHub Action
