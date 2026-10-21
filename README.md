@@ -89,6 +89,28 @@ npm run build      # Type-Check + Production-Build nach dist/
 npm run preview    # Production-Build lokal testen
 ```
 
+## Seiten auf heyartur.de
+
+> **Das Spiel ist derzeit offline.** heyartur.de zeigt nur die private Android-App Zeiterfassung, die
+> Google für die Anmeldung mit einem Google-Konto braucht. Der Spielcode bleibt im Repo und wird weiter getestet.
+
+| Adresse | Datei | Inhalt |
+|---|---|---|
+| `/` | `index.html` | leitet auf `/zeiterfassung/` weiter |
+| `/zeiterfassung/` | `zeiterfassung/index.html` | Startseite der App (für den Google-Anmeldebildschirm) |
+| `/zeiterfassung/datenschutz/` | `zeiterfassung/datenschutz/index.html` | Datenschutzerklärung der App und der Website |
+
+Alle Seiten tragen `noindex`. Die Textseiten nutzen `src/site/site.css`. Neue Seiten müssen in `vite.config.ts`
+unter `rollupOptions.input` eingetragen werden, sonst fehlen sie im Build.
+
+`npm run build` bricht ab, solange in einer Seite noch Platzhalter wie `[[E-MAIL]]` stehen
+(`scripts/check-placeholders.mjs`).
+
+**Spiel wieder online stellen:** in `vite.config.ts` `GAME_ONLINE = true` setzen. Dann liefert der Build `/hormuz/`
+(Infoseite) und `/minesweeper/` (Spiel) wieder aus. Ein öffentliches Spiel dient nicht mehr nur privaten Zwecken,
+dann braucht die Website wieder ein Impressum mit Name und Anschrift (§ 18 MStV). Die Infoseite verlinkt
+`/impressum/` und `/datenschutz/` bereits; beide Seiten müssten neu angelegt werden (in der Git-Historie dieses Branches).
+
 ## Deployment
 
 Push auf `main` baut und deployt automatisch über die GitHub Action

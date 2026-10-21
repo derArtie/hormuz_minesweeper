@@ -9,7 +9,7 @@ const errors = [];
 page.on('pageerror', (err) => errors.push(String(err)));
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
 
-await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
+await page.goto('http://localhost:5173/hormuz/', { waitUntil: 'networkidle' });
 await page.waitForTimeout(2800);
 await page.screenshot({ path: 'scripts/shots/50-landing-hero.png' });
 
@@ -27,7 +27,7 @@ await page.screenshot({ path: 'scripts/shots/53-landing-diff.png' });
 
 // Mobile-Viewport
 const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
-await mobile.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
+await mobile.goto('http://localhost:5173/hormuz/', { waitUntil: 'networkidle' });
 await mobile.waitForTimeout(2500);
 await mobile.screenshot({ path: 'scripts/shots/54-landing-mobile.png' });
 
